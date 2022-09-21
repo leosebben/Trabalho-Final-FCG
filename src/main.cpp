@@ -44,10 +44,10 @@ void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 // cada objeto da cena virtual. FONTE: Laboratório 2
 struct SceneObject
 {
-    const char*  name;        // Nome do objeto
-    void*        first_index; // Índice do primeiro vértice dentro do vetor indices[] definido em BuildTriangles()
-    int          num_indices; // Número de índices do objeto dentro do vetor indices[] definido em BuildTriangles()
-    GLenum       rendering_mode; // Modo de rasterização (GL_TRIANGLES, GL_TRIANGLE_STRIP, etc.)
+    const char*  name;              // Nome do objeto
+    void*        first_index;       // Índice do primeiro vértice dentro do vetor indices[] definido em BuildTriangles()
+    int          num_indices;       // Número de índices do objeto dentro do vetor indices[] definido em BuildTriangles()
+    GLenum       rendering_mode;    // Modo de rasterização (GL_TRIANGLES, GL_TRIANGLE_STRIP, etc.)
 };
 
 // A cena virtual é uma lista de objetos nomeados, guardados em um dicionário
@@ -67,9 +67,13 @@ bool g_LeftMouseButtonPressed = false;
 // usuário através do mouse (veja função CursorPosCallback()). A posição
 // efetiva da câmera é calculada dentro da função main(), dentro do loop de
 // renderização. FONTE: Laboratório 2
-float g_CameraTheta = 0.0f; // Ângulo no plano ZX em relação ao eixo Z
-float g_CameraPhi = 0.0f;   // Ângulo em relação ao eixo Y
+float g_CameraTheta = 0.0f;     // Ângulo no plano ZX em relação ao eixo Z
+float g_CameraPhi = 0.0f;       // Ângulo em relação ao eixo Y
 float g_CameraDistance = 2.5f; // Distância da câmera para a origem
+
+// Posição do personagem
+float character_pos_x = 0.0f;
+float character_pos_y = 0.0f;
 
 int main() {
     // Inicializamos a biblioteca GLFW, utilizada para criar uma janela do
@@ -216,12 +220,15 @@ int main() {
         float z = r*cos(g_CameraPhi)*cos(g_CameraTheta);
         float x = r*cos(g_CameraPhi)*sin(g_CameraTheta);
 
+        x += character_pos_x;
+        y += character_pos_y;
+
         // Abaixo definimos as varáveis que efetivamente definem a câmera virtual.
         // Veja slides 195-227 e 229-234 do documento Aula_08_Sistemas_de_Coordenadas.pdf. FONTE: Laboratório 2
-        glm::vec4 camera_position_c  = glm::vec4(x,y,z,1.0f); // Ponto "c", centro da câmera
-        glm::vec4 camera_lookat_l    = glm::vec4(0.0f,0.0f,0.0f,1.0f); // Ponto "l", para onde a câmera (look-at) estará sempre olhando
+        glm::vec4 camera_position_c  = glm::vec4(x,y,z,1.0f);               // Ponto "c", centro da câmera
+        glm::vec4 camera_lookat_l    = glm::vec4(0.0f,0.0f,0.0f,1.0f);      // Ponto "l", para onde a câmera (look-at) estará sempre olhando
         glm::vec4 camera_view_vector = camera_lookat_l - camera_position_c; // Vetor "view", sentido para onde a câmera está virada
-        glm::vec4 camera_up_vector   = glm::vec4(0.0f,1.0f,0.0f,0.0f); // Vetor "up" fixado para apontar para o "céu" (eito Y global)
+        glm::vec4 camera_up_vector   = glm::vec4(0.0f,1.0f,0.0f,0.0f);      // Vetor "up" fixado para apontar para o "céu" (eito Y global)
 
         // Computamos a matriz "View" utilizando os parâmetros da câmera para
         // definir o sistema de coordenadas da câmera.  Veja slides 2-14, 184-190 e 236-242 do documento Aula_08_Sistemas_de_Coordenadas.pdf.
@@ -880,8 +887,29 @@ void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
 {
     // Se o usuário pressionar a tecla ESC, fechamos a janela.
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, GL_TRUE);
+    }
+
+    // Se o usuário pressionar a tecla W, movimenta-se para frente
+    if (key == GLFW_KEY_W && action == GLFW_PRESS) {
+        character_pos_x += 1;
+    }
+
+    // Se o usuário pressionar a tecla A, movimenta-se para frente
+    if (key == GLFW_KEY_A && action == GLFW_PRESS) {
+        character_pos_y += 1;
+    }
+
+    // Se o usuário pressionar a tecla S, movimenta-se para frente
+    if (key == GLFW_KEY_S && action == GLFW_PRESS) {
+        character_pos_x -= 1;
+    }
+
+    // Se o usuário pressionar a tecla D, movimenta-se para frente
+    if (key == GLFW_KEY_D && action == GLFW_PRESS) {
+        character_pos_y -= 1;
+    }
 }
 
 // Definimos o callback para impressão de erros da GLFW no terminal FONTE: Laboratório 2

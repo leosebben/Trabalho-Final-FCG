@@ -1,3 +1,5 @@
+// FONTE: Laboratório 2
+
 #ifndef _MATRICES_H
 #define _MATRICES_H
 

@@ -1,3 +1,5 @@
+// FONTE: Laboratório 2
+
 /* ============================================================================
  * Freetype GL - A C OpenGL Freetype engine
  * Platform:    Any

@@ -1,3 +1,5 @@
+// FONTE: Laboratório 2
+
 /*************************************************************************
  * GLFW 3.2 - www.glfw.org
  * A library for OpenGL, window and input

@@ -143,27 +143,6 @@ int main() {
     printf("GPU: %s, %s, OpenGL %s, GLSL %s\n", vendor, renderer, glversion, glslversion);
 
     // Carregamos os shaders de vértices e de fragmentos que serão utilizados
-    // para renderização. Veja slides 180-200 do documento Aula_03_Rendering_Pipeline_Grafico.pdf.
-    //
-    // Note que o caminho para os arquivos "shader_vertex.glsl" e
-    // "shader_fragment.glsl" estão fixados, sendo que assumimos a existência
-    // da seguinte estrutura no sistema de arquivos:
-    //
-    //    + FCG_Lab_0X/
-    //    |
-    //    +--+ bin/
-    //    |  |
-    //    |  +--+ Release/  (ou Debug/ ou Linux/)
-    //    |     |
-    //    |     o-- main.exe
-    //    |
-    //    +--+ src/
-    //       |
-    //       o-- shader_vertex.glsl
-    //       |
-    //       o-- shader_fragment.glsl
-    //       |
-    //       o-- ...
     // FONTE: Laboratório 2
     GLuint vertex_shader_id = LoadShader_Vertex("../../src/shader_vertex.glsl");
     GLuint fragment_shader_id = LoadShader_Fragment("../../src/shader_fragment.glsl");

@@ -1,5 +1,6 @@
 // Based on http://hamelot.io/visualization/opengl-text-without-any-external-libraries/
 //   and on https://github.com/rougier/freetype-gl
+// Fonte: Lab 5
 #include <string>
 
 #include <glad/glad.h>

@@ -1,0 +1,11 @@
+#ignore the following files
+
+#--build files
+#ignore linux build file if it exists
+bin/Linux/*
+#ignore macOS build file if it exists
+bin/macOS/*
+
+#--vscode files
+#ignore vscode directory
+.vscode

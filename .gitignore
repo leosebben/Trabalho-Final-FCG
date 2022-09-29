@@ -1,0 +1,5 @@
+#ignore the following files
+.bin/Linux/main
+
+#vsc
+.vscode/*

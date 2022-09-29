@@ -1,5 +1,7 @@
 #ignore the following files
-.bin/Linux/main
 
-#vsc
-.vscode/*
+#ignore linux build file if it exists
+bin/Linux/main
+
+#ignore vscode directory
+.vscode

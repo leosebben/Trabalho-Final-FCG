@@ -72,8 +72,8 @@ float g_CameraPhi = 0.0f;       // Ângulo em relação ao eixo Y
 float g_CameraDistance = 2.5f; // Distância da câmera para a origem
 
 // Posição do personagem
-float cubo_pos_x = 0.0f;
-float cubo_pos_z = 0.0f;
+glm::vec4 cubo_pos = glm::vec4(0.0f,0.0f,0.0f,0.0f);
+glm::vec4 camera_movement_direction = glm::vec4(0.0f,0.0f,0.0f,0.0f);
 
 int main() {
     // Inicializamos a biblioteca GLFW, utilizada para criar uma janela do
@@ -199,15 +199,14 @@ int main() {
         float z = r*cos(g_CameraPhi)*cos(g_CameraTheta);
         float x = r*cos(g_CameraPhi)*sin(g_CameraTheta);
 
-        x += cubo_pos_x;
-        z += cubo_pos_z;
-
         // Abaixo definimos as varáveis que efetivamente definem a câmera virtual.
         // Veja slides 195-227 e 229-234 do documento Aula_08_Sistemas_de_Coordenadas.pdf. FONTE: Laboratório 2
-        glm::vec4 camera_position_c  = glm::vec4(x,y,z,1.0f);               // Ponto "c", centro da câmera
-        glm::vec4 camera_lookat_l    = glm::vec4(cubo_pos_x,0.0f,cubo_pos_z,1.0f);      // Ponto "l", para onde a câmera (look-at) estará sempre olhando
+        glm::vec4 camera_position_c  = glm::vec4(x,y,z,1.0f) + cubo_pos;               // Ponto "c", centro da câmera
+        glm::vec4 camera_lookat_l    = glm::vec4(cubo_pos.x,0.0f,cubo_pos.z,1.0f);      // Ponto "l", para onde a câmera (look-at) estará sempre olhando
         glm::vec4 camera_view_vector = camera_lookat_l - camera_position_c; // Vetor "view", sentido para onde a câmera está virada
         glm::vec4 camera_up_vector   = glm::vec4(0.0f,1.0f,0.0f,0.0f);      // Vetor "up" fixado para apontar para o "céu" (eito Y global)
+
+        camera_movement_direction = camera_view_vector / length(camera_view_vector);
 
         // Computamos a matriz "View" utilizando os parâmetros da câmera para
         // definir o sistema de coordenadas da câmera.  Veja slides 2-14, 184-190 e 236-242 do documento Aula_08_Sistemas_de_Coordenadas.pdf.
@@ -246,7 +245,7 @@ int main() {
         // suas coordenadas no espaço global (World Coordinates) serão
         // *exatamente iguais* a suas coordenadas no espaço do modelo
         // (Model Coordinates). FONTE: Laboratório 2
-        model = Matrix_Translate(cubo_pos_x, 0.0f, cubo_pos_z);
+        model = Matrix_Translate(cubo_pos.x,0.0f,cubo_pos.z);
 
         // Enviamos a matriz "model" para a placa de vídeo (GPU). Veja o
         // arquivo "shader_vertex.glsl", onde esta é efetivamente
@@ -872,22 +871,22 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
 
     // Se o usuário pressionar a tecla W, movimenta-se para frente
     if (key == GLFW_KEY_W && action == GLFW_PRESS) {
-        cubo_pos_z -= 1;
+        cubo_pos += glm::vec4(camera_movement_direction.x,0.0f,camera_movement_direction.z,0.0f);
     }
 
     // Se o usuário pressionar a tecla A, movimenta-se para frente
     if (key == GLFW_KEY_A && action == GLFW_PRESS) {
-        cubo_pos_x -= 1;
+        //cubo_pos_x -= 1;
     }
 
     // Se o usuário pressionar a tecla S, movimenta-se para frente
     if (key == GLFW_KEY_S && action == GLFW_PRESS) {
-        cubo_pos_z += 1;
+        cubo_pos -= glm::vec4(camera_movement_direction.x,0.0f,camera_movement_direction.z,0.0f);
     }
 
     // Se o usuário pressionar a tecla D, movimenta-se para frente
     if (key == GLFW_KEY_D && action == GLFW_PRESS) {
-        cubo_pos_x += 1;
+        //cubo_pos_x += 1;
     }
 }
 

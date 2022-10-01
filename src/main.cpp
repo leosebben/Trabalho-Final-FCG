@@ -75,6 +75,8 @@ float g_CameraDistance = 2.5f; // Distância da câmera para a origem
 glm::vec4 cubo_pos = glm::vec4(0.0f,0.0f,0.0f,0.0f);
 glm::vec2 camera_movement_direction = glm::vec2(0.0f,0.0f);
 
+double lastInputTime = 0.0;
+
 int main() {
     // Inicializamos a biblioteca GLFW, utilizada para criar uma janela do
     // sistema operacional, onde poderemos renderizar com OpenGL. FONTE: Laboratório 2
@@ -872,25 +874,34 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
         glfwSetWindowShouldClose(window, GL_TRUE);
     }
 
-    // Se o usuário pressionar a tecla W, movimenta-se para frente
-    if (key == GLFW_KEY_W && action == GLFW_PRESS) {
-        cubo_pos += glm::vec4(camera_movement_direction.x, 0.0f, camera_movement_direction.y,0.0f);
+    // Torna movimento baseado no tempo
+    if (lastInputTime + 0.01 < glfwGetTime()) {
+        // Se o usuário pressionar a tecla W, movimenta-se para frente
+        if (key == GLFW_KEY_W && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+            cubo_pos += glm::vec4(camera_movement_direction.x, 0.0f, camera_movement_direction.y,0.0f);
+        }
+
+        // Se o usuário pressionar a tecla A, movimenta-se para frente
+        if (key == GLFW_KEY_A && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+            glm::vec4 result = crossproduct(glm::vec4(camera_movement_direction.x, 0.0f, camera_movement_direction.y,0.0f),
+                                            glm::vec4(0.0f, 1.0f, 0.0f, 0.0f));
+            cubo_pos -= result;
+        }
+
+        // Se o usuário pressionar a tecla S, movimenta-se para frente
+        if (key == GLFW_KEY_S && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+            cubo_pos -= glm::vec4(camera_movement_direction.x, 0.0f, camera_movement_direction.y,0.0f);
+        }
+
+        // Se o usuário pressionar a tecla D, movimenta-se para frente
+        if (key == GLFW_KEY_D && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+            glm::vec4 result = crossproduct(glm::vec4(camera_movement_direction.x, 0.0f, camera_movement_direction.y,0.0f),
+                                            glm::vec4(0.0f, 1.0f, 0.0f, 0.0f));
+            cubo_pos += result;
+        }
     }
 
-    // Se o usuário pressionar a tecla A, movimenta-se para frente
-    if (key == GLFW_KEY_A && action == GLFW_PRESS) {
-        cubo_pos += glm::vec4(camera_movement_direction.x, 0.0f, -camera_movement_direction.y,0.0f);
-    }
-
-    // Se o usuário pressionar a tecla S, movimenta-se para frente
-    if (key == GLFW_KEY_S && action == GLFW_PRESS) {
-        cubo_pos -= glm::vec4(camera_movement_direction.x, 0.0f, camera_movement_direction.y,0.0f);
-    }
-
-    // Se o usuário pressionar a tecla D, movimenta-se para frente
-    if (key == GLFW_KEY_D && action == GLFW_PRESS) {
-        cubo_pos += glm::vec4(-camera_movement_direction.x, 0.0f, camera_movement_direction.y,0.0f);
-    }
+    lastInputTime = glfwGetTime();
 }
 
 // Definimos o callback para impressão de erros da GLFW no terminal FONTE: Laboratório 2

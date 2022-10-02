@@ -198,27 +198,27 @@ int main(int argc, char* argv[]) {
     LoadShadersFromFiles();
 
     // Construímos a representação de objetos geométricos através de malhas de triângulos - FONTE: Laboratório 4
-    ObjModel spheremodel("../../data/sphere.obj");
+    ObjModel spheremodel("../../data/objects/sphere.obj");
     ComputeNormals(&spheremodel);
     BuildTrianglesAndAddToVirtualScene(&spheremodel);
 
-    ObjModel bunnymodel("../../data/bunny.obj");
+    ObjModel bunnymodel("../../data/objects/bunny.obj");
     ComputeNormals(&bunnymodel);
     BuildTrianglesAndAddToVirtualScene(&bunnymodel);
 
-    ObjModel planemodel("../../data/plane.obj");
+    ObjModel planemodel("../../data/objects/plane.obj");
     ComputeNormals(&planemodel);
     BuildTrianglesAndAddToVirtualScene(&planemodel);
 
-    ObjModel mfourmodel("../../data/mfour.obj");
+    ObjModel mfourmodel("../../data/objects/mfour.obj");
     ComputeNormals(&mfourmodel);
     BuildTrianglesAndAddToVirtualScene(&mfourmodel);
     
-    ObjModel baloonmodel("../../data/baloon.obj");
+    ObjModel baloonmodel("../../data/objects/baloon.obj");
     ComputeNormals(&baloonmodel);
     BuildTrianglesAndAddToVirtualScene(&baloonmodel);
 
-    ObjModel bulletmodel("../../data/bullet.obj");
+    ObjModel bulletmodel("../../data/objects/bullet.obj");
     ComputeNormals(&bulletmodel);
     BuildTrianglesAndAddToVirtualScene(&bulletmodel);
 
@@ -319,8 +319,8 @@ int main(int argc, char* argv[]) {
         // Desenhamos o modelo do coelho - Fonte: Laboratorio 04
         model = Matrix_Translate(1.0f,0.0f,-6.0f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-        glUniform1i(object_id_uniform, BUNNY);
-        DrawVirtualObject("bunny");
+        glUniform1i(object_id_uniform, PLANE);
+        DrawVirtualObject("plane");
         
         // Desenhamos o modelo do baloon - Fonte: Laboratorio 04
         model = Matrix_Scale(0.5f,0.5f,0.5f) * Matrix_Translate(-3.0f,0.0f,0.0f);

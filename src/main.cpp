@@ -77,6 +77,8 @@ glm::vec2 camera_movement_direction = glm::vec2(0.0f,0.0f);
 
 double lastInputTime = 0.0;
 
+bool firstPersonMode = false;
+
 int main() {
     // Inicializamos a biblioteca GLFW
     int success = glfwInit();
@@ -176,11 +178,29 @@ int main() {
         float z = r*cos(g_CameraPhi)*cos(g_CameraTheta);
         float x = r*cos(g_CameraPhi)*sin(g_CameraTheta);
 
-        // Abaixo definimos as varáveis que efetivamente definem a câmera virtual. FONTE: Laboratório 2
-        glm::vec4 camera_position_c  = glm::vec4(x,y,z,1.0f) + cubo_pos;
-        glm::vec4 camera_lookat_l    = glm::vec4(cubo_pos.x,0.0f,cubo_pos.z,1.0f);
-        glm::vec4 camera_view_vector = camera_lookat_l - camera_position_c;
-        glm::vec4 camera_up_vector   = glm::vec4(0.0f,1.0f,0.0f,0.0f);
+        // camera variable
+        glm::vec4 camera_position_c;
+        glm::vec4 camera_lookat_l;
+        glm::vec4 camera_free_l;
+        glm::vec4 camera_view_vector;
+        glm::vec4 camera_up_vector;
+
+        if (!firstPersonMode)
+        {
+            // Abaixo definimos as varáveis que efetivamente definem a câmera virtual to tipo look at. FONTE: Laboratório 2
+            camera_position_c  = glm::vec4(x,y,z,1.0f) + cubo_pos;
+            camera_lookat_l    = glm::vec4(cubo_pos.x,0.0f,cubo_pos.z,1.0f);
+            camera_view_vector = camera_lookat_l - camera_position_c;
+            camera_up_vector   = glm::vec4(0.0f,1.0f,0.0f,0.0f);
+        } 
+        else 
+        {
+            // Abaixo definimos as varáveis que efetivamente definem a câmera virtual do tipo free camera. FONTE: Laboratório 2
+            camera_position_c  = glm::vec4(0.0f,0.0f,0.0f,1.0f) + cubo_pos;
+            camera_free_l      = glm::vec4(z,y,x,1.0f) + cubo_pos;
+            camera_view_vector = camera_free_l - camera_position_c;
+            camera_up_vector   = glm::vec4(0.0f,1.0f,0.0f,0.0f);
+        }
 
         // Salvamos a direção da câmera em um vetor com as coordenadas de x e z
         float camera_view_length = sqrt(pow(camera_view_vector.x, 2) + pow(camera_view_vector.z, 2));
@@ -193,8 +213,8 @@ int main() {
         glm::mat4 projection;
 
         // Definimos o near, far e o field of view
-        float nearplane = -0.1f;
-        float farplane  = -10.0f;
+        float nearplane = -1.0f;
+        float farplane  = -20.0f;
         float field_of_view = 3.141592 / 3.0f;
         projection = Matrix_Perspective(field_of_view, g_ScreenRatio, nearplane, farplane);
 
@@ -780,6 +800,10 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
     // Se o usuário pressionar a tecla ESC, fechamos a janela.
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, GL_TRUE);
+    }
+
+    if (key == GLFW_KEY_SPACE && action == GLFW_PRESS) {
+        firstPersonMode = !firstPersonMode;
     }
 
     // Torna movimento baseado no tempo

@@ -78,8 +78,7 @@ glm::vec2 camera_movement_direction = glm::vec2(0.0f,0.0f);
 double lastInputTime = 0.0;
 
 int main() {
-    // Inicializamos a biblioteca GLFW, utilizada para criar uma janela do
-    // sistema operacional, onde poderemos renderizar com OpenGL. FONTE: Laboratório 2
+    // Inicializamos a biblioteca GLFW
     int success = glfwInit();
     if (!success)
     {
@@ -87,10 +86,10 @@ int main() {
         std::exit(EXIT_FAILURE);
     }
 
-    // Definimos o callback para impressão de erros da GLFW no terminal FONTE: Laboratório 2
+    // Callback para mostrar bugs
     glfwSetErrorCallback(ErrorCallback);
 
-    // Pedimos para utilizar OpenGL versão 3.3 (ou superior) FONTE: Laboratório 2
+    // Versão do OPENGL
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
@@ -98,12 +97,10 @@ int main() {
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     #endif
 
-    // Pedimos para utilizar o perfil "core", isto é, utilizaremos somente as
-    // funções modernas de OpenGL. FONTE: Laboratório 2
+    // Utilizar só o core, funções modernas
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    // Criamos uma janela do sistema operacional, com 800 colunas e 800 linhas
-    // de pixels, e com título "INF01047  - Trabalho Final". FONTE: Laboratório 2
+    // Criarmos a janela do sistema operacional
     GLFWwindow* window;
     window = glfwCreateWindow(800, 800, "INF01047 - Trabalho Final", NULL, NULL);
     if (!window)
@@ -113,27 +110,23 @@ int main() {
         std::exit(EXIT_FAILURE);
     }
 
-    // Definimos a função de callback que será chamada sempre que o usuário
-    // pressionar alguma tecla do teclado ... FONTE: Laboratório 2
+    // Função callback sempre que o usuário precionar uma tecla
     glfwSetKeyCallback(window, KeyCallback);
-    // ... ou clicar os botões do mouse ... FONTE: Laboratório 2
+
+    // Funções de callback referentes ao mouse
     glfwSetMouseButtonCallback(window, MouseButtonCallback);
-    // ... ou movimentar o cursor do mouse em cima da janela ... FONTE: Laboratório 2
     glfwSetCursorPosCallback(window, CursorPosCallback);
-    // ... ou rolar a "rodinha" do mouse. FONTE: Laboratório 2
     glfwSetScrollCallback(window, ScrollCallback);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-    // Definimos a função de callback que será chamada sempre que a janela for
-    // redimensionada, por consequência alterando o tamanho do "framebuffer"
-    // (região de memória onde são armazenados os pixels da imagem). FONTE: Laboratório 2
+    // Função para redimensionar a tela
     glfwSetFramebufferSizeCallback(window, FramebufferSizeCallback);
-    glfwSetWindowSize(window, 800, 800); // Forçamos a chamada do callback acima, para definir g_ScreenRatio.
+    glfwSetWindowSize(window, 800, 800); 
 
-    // Indicamos que as chamadas OpenGL deverão renderizar nesta janela FONTE: Laboratório 2
+    // Indicamos que as chamadas OpenGL deverão renderizar nesta janela
     glfwMakeContextCurrent(window);
 
-    // Carregamento de todas funções definidas por OpenGL 3.3, utilizando a
-    // biblioteca GLAD. FONTE: Laboratório 2
+    // Carregamento de todas funções definidas por OpenGL 3.3
     gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
 
     // Imprimimos no terminal informações sobre a GPU do sistema FONTE: Laboratório 2
@@ -145,7 +138,6 @@ int main() {
     printf("GPU: %s, %s, OpenGL %s, GLSL %s\n", vendor, renderer, glversion, glslversion);
 
     // Carregamos os shaders de vértices e de fragmentos que serão utilizados
-    // FONTE: Laboratório 2
     GLuint vertex_shader_id = LoadShader_Vertex("../../src/shader_vertex.glsl");
     GLuint fragment_shader_id = LoadShader_Fragment("../../src/shader_fragment.glsl");
 
@@ -155,143 +147,84 @@ int main() {
     // Construímos a representação de um triângulo FONTE: Laboratório 2
     GLuint vertex_array_object_id = BuildTriangles();
 
-    // Buscamos o endereço das variáveis definidas dentro do Vertex Shader.
-    // Utilizaremos estas variáveis para enviar dados para a placa de vídeo
-    // (GPU)! Veja arquivo "shader_vertex.glsl". FONTE: Laboratório 2
-    GLint model_uniform           = glGetUniformLocation(program_id, "model"); // Variável da matriz "model"
-    GLint view_uniform            = glGetUniformLocation(program_id, "view"); // Variável da matriz "view" em shader_vertex.glsl
-    GLint projection_uniform      = glGetUniformLocation(program_id, "projection"); // Variável da matriz "projection" em shader_vertex.glsl
-    GLint render_as_black_uniform = glGetUniformLocation(program_id, "render_as_black"); // Variável booleana em shader_vertex.glsl
+    GLint model_uniform           = glGetUniformLocation(program_id, "model");
+    GLint view_uniform            = glGetUniformLocation(program_id, "view");
+    GLint projection_uniform      = glGetUniformLocation(program_id, "projection");
+    GLint render_as_black_uniform = glGetUniformLocation(program_id, "render_as_black");
 
-    // Habilitamos o Z-buffer. Veja slides 104-116 do documento Aula_09_Projecoes.pdf. FONTE: Laboratório 2
+    // Habilitamos o Z-buffer
     glEnable(GL_DEPTH_TEST);
 
-    // Ficamos em loop, renderizando, até que o usuário feche a janela FONTE: Laboratório 2
+    // Ficamos em loop, renderizando, até que o usuário feche a janela
     while (!glfwWindowShouldClose(window))
     {
-        // Aqui executamos as operações de renderização
-
-        // Definimos a cor do "fundo" do framebuffer como branco.  Tal cor é
-        // definida como coeficientes RGBA: Red, Green, Blue, Alpha; isto é:
-        // Vermelho, Verde, Azul, Alpha (valor de transparência).
-        // Conversaremos sobre sistemas de cores nas aulas de Modelos de Iluminação. FONTE: Laboratório 2
-        //
-        //           R     G     B     A
+        // Definição da cor de fundo
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
-        // "Pintamos" todos os pixels do framebuffer com a cor definida acima,
-        // e também resetamos todos os pixels do Z-buffer (depth buffer). FONTE: Laboratório 2
+        // Limpa com a cor acima / reseta Z-buffer
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // Pedimos para a GPU utilizar o programa de GPU criado acima (contendo
-        // os shaders de vértice e fragmentos). FONTE: Laboratório 2
+        // Pedimos para a GPU utilizar o programa de GPU criado acima 
         glUseProgram(program_id);
 
-        // "Ligamos" o VAO. Informamos que queremos utilizar os atributos de
-        // vértices apontados pelo VAO criado pela função BuildTriangles(). Veja
-        // comentários detalhados dentro da definição de BuildTriangles(). FONTE: Laboratório 2
+        // "Ligamos" o VAO
         glBindVertexArray(vertex_array_object_id);
 
-        // Computamos a posição da câmera utilizando coordenadas esféricas.  As
-        // variáveis g_CameraDistance, g_CameraPhi, e g_CameraTheta são
-        // controladas pelo mouse do usuário. Veja as funções CursorPosCallback()
-        // e ScrollCallback(). FONTE: Laboratório 2
+        // Computamos a posição da câmera utilizando coordenadas esféricas.
         float r = g_CameraDistance;
         float y = r*sin(g_CameraPhi);
         float z = r*cos(g_CameraPhi)*cos(g_CameraTheta);
         float x = r*cos(g_CameraPhi)*sin(g_CameraTheta);
 
         // Abaixo definimos as varáveis que efetivamente definem a câmera virtual. FONTE: Laboratório 2
-        glm::vec4 camera_position_c  = glm::vec4(x,y,z,1.0f) + cubo_pos;                // Ponto "c", centro da câmera
-        glm::vec4 camera_lookat_l    = glm::vec4(cubo_pos.x,0.0f,cubo_pos.z,1.0f);      // Ponto "l", para onde a câmera (look-at) estará sempre olhando
-        glm::vec4 camera_view_vector = camera_lookat_l - camera_position_c;             // Vetor "view", sentido para onde a câmera está virada
-        glm::vec4 camera_up_vector   = glm::vec4(0.0f,1.0f,0.0f,0.0f);                  // Vetor "up" fixado para apontar para o "céu" (eito Y global)
+        glm::vec4 camera_position_c  = glm::vec4(x,y,z,1.0f) + cubo_pos;
+        glm::vec4 camera_lookat_l    = glm::vec4(cubo_pos.x,0.0f,cubo_pos.z,1.0f);
+        glm::vec4 camera_view_vector = camera_lookat_l - camera_position_c;
+        glm::vec4 camera_up_vector   = glm::vec4(0.0f,1.0f,0.0f,0.0f);
 
-        // Comprimento do vetor da câmera
+        // Salvamos a direção da câmera em um vetor com as coordenadas de x e z
         float camera_view_length = sqrt(pow(camera_view_vector.x, 2) + pow(camera_view_vector.z, 2));
-
-        // Vetor normalizado
         camera_movement_direction = glm::vec2(camera_view_vector.x/camera_view_length, camera_view_vector.z/camera_view_length);
 
-        // Computamos a matriz "View" utilizando os parâmetros da câmera para
-        // definir o sistema de coordenadas da câmera.  Veja slides 2-14, 184-190 e 236-242 do documento Aula_08_Sistemas_de_Coordenadas.pdf.
-        // FONTE: Laboratório 2
+        // Computamos a matriz "View" utilizando os parâmetros da câmera
         glm::mat4 view = Matrix_Camera_View(camera_position_c, camera_view_vector, camera_up_vector);
 
-        // Agora computamos a matriz de Projeção. FONTE: Laboratório 2
+        // Agora computamos a matriz de Projeção. -------------------------------------------------------------------------------------
         glm::mat4 projection;
 
-        // Note que, no sistema de coordenadas da câmera, os planos near e far
-        // estão no sentido negativo! Veja slides 176-204 do documento Aula_09_Projecoes.pdf. FONTE: Laboratório 2
-        float nearplane = -0.1f;  // Posição do "near plane"
-        float farplane  = -10.0f; // Posição do "far plane"
-
-        // Projeção Perspectiva.
-        // Para definição do field of view (FOV), veja slides 205-215 do documento Aula_09_Projecoes.pdf. FONTE: Laboratório 2
+        // Definimos o near, far e o field of view
+        float nearplane = -0.1f;
+        float farplane  = -10.0f;
         float field_of_view = 3.141592 / 3.0f;
         projection = Matrix_Perspective(field_of_view, g_ScreenRatio, nearplane, farplane);
 
         // Enviamos as matrizes "view" e "projection" para a placa de vídeo
-        // (GPU). Veja o arquivo "shader_vertex.glsl", onde estas são
-        // efetivamente aplicadas em todos os pontos. FONTE: Laboratório 2
         glUniformMatrix4fv(view_uniform       , 1 , GL_FALSE , glm::value_ptr(view));
         glUniformMatrix4fv(projection_uniform , 1 , GL_FALSE , glm::value_ptr(projection));
 
-        // Desenha um cubo
-
-        // Cada cópia do cubo possui uma matriz de modelagem independente,
-        // já que cada cópia estará em uma posição (rotação, escala, ...)
-        // diferente em relação ao espaço global (World Coordinates). Veja
-        // slides 2-14 e 184-190 do documento Aula_08_Sistemas_de_Coordenadas.pdf. FONTE: Laboratório 2
+        // Desenha um cubo -------------------------------------------------------------------------------------------------------------
         glm::mat4 model;
 
-        // A primeira cópia do cubo não sofrerá nenhuma transformação
-        // de modelagem. Portanto, sua matriz "model" é a identidade, e
-        // suas coordenadas no espaço global (World Coordinates) serão
-        // *exatamente iguais* a suas coordenadas no espaço do modelo
-        // (Model Coordinates). FONTE: Laboratório 2
-        model = Matrix_Translate(cubo_pos.x,0.0f,cubo_pos.z);
+        // Definimos a posição do cubo baseado na movimentação prévia
+        model = Matrix_Translate(cubo_pos.x ,0.0f,cubo_pos.z) * Matrix_Rotate_Y(g_CameraTheta);
 
-        // Enviamos a matriz "model" para a placa de vídeo (GPU). Veja o
-        // arquivo "shader_vertex.glsl", onde esta é efetivamente
-        // aplicada em todos os pontos. FONTE: Laboratório 2
+        // Enviamos a matriz "model" para a placa de vídeo (GPU)
         glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
 
-        // Informamos para a placa de vídeo (GPU) que a variável booleana
-        // "render_as_black" deve ser colocada como "false". Veja o arquivo
-        // "shader_vertex.glsl". FONTE: Laboratório 2
         glUniform1i(render_as_black_uniform, false);
 
-        // Pedimos para a GPU rasterizar os vértices do cubo apontados pelo
-        // VAO como triângulos, formando as faces do cubo. Esta
-        // renderização irá executar o Vertex Shader definido no arquivo
-        // "shader_vertex.glsl", e o mesmo irá utilizar as matrizes
-        // "model", "view" e "projection" definidas acima e já enviadas
-        // para a placa de vídeo (GPU).
-        //
-        // Veja a definição de g_VirtualScene["cube_faces"] dentro da
-        // função BuildTriangles(), e veja a documentação da função
-        // glDrawElements() em http://docs.gl/gl3/glDrawElements. FONTE: Laboratório 2
+        // Desenhamos o cubo
         glDrawElements(
-            g_VirtualScene["cube_faces"].rendering_mode, // Veja slides 182-188 do documento Aula_04_Modelagem_Geometrica_3D.pdf
+            g_VirtualScene["cube_faces"].rendering_mode,
             g_VirtualScene["cube_faces"].num_indices,
             GL_UNSIGNED_INT,
             (void*)g_VirtualScene["cube_faces"].first_index
         );
 
-        // Pedimos para OpenGL desenhar linhas com largura de 4 pixels. FONTE: Laboratório 2
+        // Pedimos para OpenGL desenhar linhas com largura de 4 pixels.
         glLineWidth(4.0f);
 
-        // Pedimos para a GPU rasterizar os vértices dos eixos XYZ
-        // apontados pelo VAO como linhas. Veja a definição de
-        // g_VirtualScene["axes"] dentro da função BuildTriangles(), e veja
-        // a documentação da função glDrawElements() em
-        // http://docs.gl/gl3/glDrawElements.
-        //
-        // Importante: estes eixos serão desenhamos com a matriz "model"
-        // definida acima, e portanto sofrerão as mesmas transformações
-        // geométricas que o cubo. Isto é, estes eixos estarão
-        // representando o sistema de coordenadas do modelo (e não o global)! FONTE: Laboratório 2
+        // Essas linhas acompanharão o cubo
         glDrawElements(
             g_VirtualScene["axes"].rendering_mode,
             g_VirtualScene["axes"].num_indices,
@@ -299,16 +232,9 @@ int main() {
             (void*)g_VirtualScene["axes"].first_index
         );
 
-        // Informamos para a placa de vídeo (GPU) que a variável booleana
-        // "render_as_black" deve ser colocada como "true". Veja o arquivo
-        // "shader_vertex.glsl". FONTE: Laboratório 2
         glUniform1i(render_as_black_uniform, true);
 
-        // Pedimos para a GPU rasterizar os vértices do cubo apontados pelo
-        // VAO como linhas, formando as arestas pretas do cubo. Veja a
-        // definição de g_VirtualScene["cube_edges"] dentro da função
-        // BuildTriangles(), e veja a documentação da função
-        // glDrawElements() em http://docs.gl/gl3/glDrawElements. FONTE: Laboratório 2
+        // Desenhamos os vértices do cubo
         glDrawElements(
             g_VirtualScene["cube_edges"].rendering_mode,
             g_VirtualScene["cube_edges"].num_indices,
@@ -316,28 +242,31 @@ int main() {
             (void*)g_VirtualScene["cube_edges"].first_index
         );
 
-        // Agora queremos desenhar os eixos XYZ de coordenadas GLOBAIS.
-        // Para tanto, colocamos a matriz de modelagem igual à identidade.
-        // Veja slides 2-14 e 184-190 do documento Aula_08_Sistemas_de_Coordenadas.pdf. FONTE: Laboratório 2
+        // Queremos desenhas as linhas que definem o sistema de coordenadas global
         model = Matrix_Identity();
 
-        // Enviamos a nova matriz "model" para a placa de vídeo (GPU). Veja o
-        // arquivo "shader_vertex.glsl". FONTE: Laboratório 2
+        // Enviamos a matriz "model" para a placa de vídeo (GPU)
+        glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
+
+        glUniform1i(render_as_black_uniform, false);
+
+        // Desenhamos o cubo
+        glDrawElements(
+            g_VirtualScene["cube_faces"].rendering_mode,
+            g_VirtualScene["cube_faces"].num_indices,
+            GL_UNSIGNED_INT,
+            (void*)g_VirtualScene["cube_faces"].first_index
+        );
+
+        // Enviamos a nova matriz "model" para a placa de vídeo (GPU)
         glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
 
         // Pedimos para OpenGL desenhar linhas com largura de 10 pixels. FONTE: Laboratório 2
         glLineWidth(10.0f);
 
-        // Informamos para a placa de vídeo (GPU) que a variável booleana
-        // "render_as_black" deve ser colocada como "false". Veja o arquivo
-        // "shader_vertex.glsl". FONTE: Laboratório 2
         glUniform1i(render_as_black_uniform, false);
 
-        // Pedimos para a GPU rasterizar os vértices dos eixos XYZ
-        // apontados pelo VAO como linhas. Veja a definição de
-        // g_VirtualScene["axes"] dentro da função BuildTriangles(), e veja
-        // a documentação da função glDrawElements() em
-        // http://docs.gl/gl3/glDrawElements. FONTE: Laboratório 2
+        // Desenhamos as linhas que serão as coordenadas globais
         glDrawElements(
             g_VirtualScene["axes"].rendering_mode,
             g_VirtualScene["axes"].num_indices,
@@ -345,23 +274,11 @@ int main() {
             (void*)g_VirtualScene["axes"].first_index
         );
 
-        // "Desligamos" o VAO, evitando assim que operações posteriores venham a
-        // alterar o mesmo. Isso evita bugs. FONTE: Laboratório 2
+        // "Desligamos" o VAO, isso evita bugs.
         glBindVertexArray(0);
 
-        // O framebuffer onde OpenGL executa as operações de renderização não
-        // é o mesmo que está sendo mostrado para o usuário, caso contrário
-        // seria possível ver artefatos conhecidos como "screen tearing". A
-        // chamada abaixo faz a troca dos buffers, mostrando para o usuário
-        // tudo que foi renderizado pelas funções acima. FONTE: Laboratório 2
-        // Veja o link: Veja o link: https://en.wikipedia.org/w/index.php?title=Multiple_buffering&oldid=793452829#Double_buffering_in_computer_graphics
         glfwSwapBuffers(window);
-
-        // Verificamos com o sistema operacional se houve alguma interação do
-        // usuário (teclado, mouse, ...). Caso positivo, as funções de callback
-        // definidas anteriormente usando glfwSet*Callback() serão chamadas
-        // pela biblioteca GLFW. FONTE: Laboratório 2
-        glfwPollEvents();
+        glfwPollEvents(); // Verificamos se houve alguma interação com o teclado
     }
 
     // Finalizamos o uso dos recursos do sistema operacional FONTE: Laboratório 2
@@ -374,16 +291,7 @@ int main() {
 // Constrói triângulos para futura renderização FONTE: Laboratório 2
 GLuint BuildTriangles()
 {
-    // Primeiro, definimos os atributos de cada vértice.
-
-    // A posição de cada vértice é definida por coeficientes em um sistema de
-    // coordenadas local de cada modelo geométrico. Note o uso de coordenadas
-    // homogêneas.  Veja as seguintes referências:
-    //
-    //  - slides 35-48 do documento Aula_08_Sistemas_de_Coordenadas.pdf;
-    //  - slides 184-190 do documento Aula_08_Sistemas_de_Coordenadas.pdf;
-    //
-    // Este vetor "model_coefficients" define a GEOMETRIA (veja slides 103-110 do documento Aula_04_Modelagem_Geometrica_3D.pdf).
+    // Primeiro, definimos os atributos de cada vértice.a GEOMETRIA (veja slides 103-110 do documento Aula_04_Modelagem_Geometrica_3D.pdf).
     // FONTE: Laboratório 2
     GLfloat model_coefficients[] = {
     // Vértices de um cubo
@@ -821,8 +729,8 @@ void CursorPosCallback(GLFWwindow* window, double xpos, double ypos)
     // parâmetros que definem a posição da câmera dentro da cena virtual.
     // Assim, temos que o usuário consegue controlar a câmera.
 
-    if (!g_LeftMouseButtonPressed)
-        return;
+    //if (!g_LeftMouseButtonPressed)
+    //    return;
 
     // Deslocamento do cursor do mouse em x e y de coordenadas de tela!
     float dx = xpos - g_LastCursorPosX;

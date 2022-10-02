@@ -197,7 +197,7 @@ int main() {
         {
             // Abaixo definimos as varáveis que efetivamente definem a câmera virtual do tipo free camera. FONTE: Laboratório 2
             camera_position_c  = glm::vec4(0.0f,0.0f,0.0f,1.0f) + cubo_pos;
-            camera_free_l      = glm::vec4(z,y,x,1.0f) + cubo_pos;
+            camera_free_l      = glm::vec4(-x,-y,-z,1.0f) - cubo_pos;
             camera_view_vector = camera_free_l - camera_position_c;
             camera_up_vector   = glm::vec4(0.0f,1.0f,0.0f,0.0f);
         }

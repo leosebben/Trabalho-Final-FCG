@@ -218,6 +218,10 @@ int main(int argc, char* argv[]) {
     ComputeNormals(&baloonmodel);
     BuildTrianglesAndAddToVirtualScene(&baloonmodel);
 
+    ObjModel bulletmodel("../../data/bullet.obj");
+    ComputeNormals(&bulletmodel);
+    BuildTrianglesAndAddToVirtualScene(&bulletmodel);
+
 
     if ( argc > 1 )// FONTE: Laboratório 4
     {
@@ -304,30 +308,37 @@ int main(int argc, char* argv[]) {
         #define PLANE  2
         #define BALOON 3
         #define MFOUR  4
+        #define BULLET 5
 
         // Desenhamos o modelo da esfera - Fonte: Laboratorio 04
-        model = Matrix_Translate(-1.0f,0.0f,0.0f);
+        model = Matrix_Translate(-1.0f,0.0f,-6.0f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, SPHERE);
         DrawVirtualObject("sphere");
 
         // Desenhamos o modelo do coelho - Fonte: Laboratorio 04
-        model = Matrix_Translate(1.0f,0.0f,0.0f);
+        model = Matrix_Translate(1.0f,0.0f,-6.0f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, BUNNY);
         DrawVirtualObject("bunny");
-
-        // Desenhamos o modelo do coelho - Fonte: Laboratorio 04
-        model = Matrix_Scale(10.03f,10.0f,10.0f) * Matrix_Translate(3.0f,0.0f,0.0f);
+        
+        // Desenhamos o modelo do baloon - Fonte: Laboratorio 04
+        model = Matrix_Scale(0.5f,0.5f,0.5f) * Matrix_Translate(-3.0f,0.0f,0.0f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, BALOON);
         DrawVirtualObject("baloon");
 
-        // Desenhamos o modelo do coelho - Fonte: Laboratorio 04
-        model = Matrix_Scale(0.03f,0.03f,0.03f) * Matrix_Translate(104.0f,0.0f,0.0f);
+        // Desenhamos o modelo do mfour - Fonte: Laboratorio 04
+        model = Matrix_Scale(0.03f,0.03f,0.03f) * Matrix_Translate(10.0f,0.0f,0.0f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, MFOUR);
         DrawVirtualObject("mfour");
+
+         // Desenhamos o modelo do baloon - Fonte: Laboratorio 04
+        model = Matrix_Scale(10.0f,10.0f,10.0f) * Matrix_Translate(0.07f,0.0f,0.0f);
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, BUNNY);
+        DrawVirtualObject("bullet");
 
         // O framebuffer onde OpenGL executa as operações de renderização não
         // é o mesmo que está sendo mostrado para o usuário, caso contrário

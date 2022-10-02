@@ -207,7 +207,7 @@ glm::vec4 crossproduct(glm::vec4 u, glm::vec4 v)
     return glm::vec4(
         u2*v3 - u3*v2, // Primeiro coeficiente
         u3*v1 - u1*v3, // Segundo coeficiente
-        u1*v2 - u2*v1, // PREENCHA AQUI o terceiro coeficiente de um produto vetorial
+        u1*v2 - u2*v1, // Terceiro coeficiente de um produto vetorial
         0.0f // w = 0 para vetores.
     );
 }

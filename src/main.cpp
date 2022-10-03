@@ -304,7 +304,7 @@ int main(int argc, char* argv[]) {
         float timeVariation = glfwGetTime() - lastInputTime;
         lastInputTime = glfwGetTime();
 
-        float speed = 2.0;
+        float speed = 2.4;
         float resultDistance = speed * timeVariation;
 
         movement_direction = glm::vec2(camera_view_vector.x/length_2, camera_view_vector.z/length_2);

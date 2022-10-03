@@ -150,6 +150,8 @@ glm::vec4 view_direction = glm::vec4(0.0f,0.0f,0.0f,0.0f);
 
 double lastInputTime = 0.0;
 
+bool rotate_character = false;
+
 bool w_buttonPressed = false;
 bool a_buttonPressed = false;
 bool s_buttonPressed = false;
@@ -159,7 +161,9 @@ bool firstPersonMode = false;
 
 // ----- Atirar -----
 std::vector<Bullet> bulletsOnScene;
+
 float bulletSpeed = 2.0;
+bool canShoot = false;
 
 int main(int argc, char* argv[]) {
     // Inicializamos a biblioteca GLFW. Fonte laboratório 2
@@ -309,6 +313,9 @@ int main(int argc, char* argv[]) {
         // Câmera na terceira pessoa
         if (!firstPersonMode)
         {
+            // Desabilita tiro
+            canShoot = false;
+
             // Abaixo definimos as varáveis que efetivamente definem a câmera virtual to tipo look at. FONTE: Laboratório 2
             camera_position_c  = glm::vec4(x,y,z,1.0f) + character_pos;
             camera_lookat_l    = glm::vec4(character_pos.x, character_pos.y,character_pos.z,1.0f);
@@ -317,6 +324,9 @@ int main(int argc, char* argv[]) {
         } 
         else // Câmera na primeira pessoa 
         {
+            // Habilita tiro
+            canShoot = true;
+
             // Abaixo definimos as varáveis que efetivamente definem a câmera virtual do tipo free camera. FONTE: Laboratório 2
             camera_position_c  = glm::vec4(0.0f,0.0f,0.0f,1.0f) + character_pos;
             camera_free_l      = glm::vec4(x,-y,z,1.0f) + character_pos;
@@ -1145,7 +1155,7 @@ double g_LastCursorPosX, g_LastCursorPosY;
 // Função callback chamada sempre que o usuário aperta algum dos botões do mouse FONTE: Laboratório 2
 void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 {
-    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) 
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && canShoot) 
     {
         Bullet newBullet;
 
@@ -1155,10 +1165,7 @@ void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
                                                    view_direction.y * 20,
                                                    view_direction.z * 20,
                                                    0.0f);
-        newBullet.destiny = glm::vec4(newBullet.goal.x,
-                                      0.0f,
-                                      newBullet.goal.z,
-                                      1.0f);
+        newBullet.destiny = glm::vec4(newBullet.goal.x, 0.0f, newBullet.goal.z, 1.0f);
         newBullet.destiny += glm::vec4(view_direction.x * 10, 0.0f,view_direction.z * 10,0.0f);
         
         newBullet.object_angle = g_CameraTheta + M_PI;

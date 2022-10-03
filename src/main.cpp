@@ -128,7 +128,7 @@ GLuint g_NumLoadedTextures = 0;
 
 
 // ----- Câmera e Movimentação -----
-glm::vec4 character_pos = glm::vec4(0.0f,0.5f,0.0f,0.0f);
+glm::vec4 character_pos = glm::vec4(0.0f,0.0f,0.0f,0.0f);
 glm::vec2 movement_direction = glm::vec2(0.0f,0.0f);
 glm::vec4 view_direction = glm::vec4(0.0f,0.0f,0.0f,0.0f);
 
@@ -142,7 +142,7 @@ bool d_buttonPressed = false;
 bool firstPersonMode = false;
 
 // ----- Atirar -----
-Bullet bulletsOnScene[10] = {};
+std::vector<Bullet> bulletsOnScene;
 
 int main(int argc, char* argv[]) {
     // Inicializamos a biblioteca GLFW. Fonte laboratório 2
@@ -287,7 +287,7 @@ int main(int argc, char* argv[]) {
         {
             // Abaixo definimos as varáveis que efetivamente definem a câmera virtual to tipo look at. FONTE: Laboratório 2
             camera_position_c  = glm::vec4(x,y,z,1.0f) + character_pos;
-            camera_lookat_l    = glm::vec4(character_pos.x,character_pos.y,character_pos.z,1.0f);
+            camera_lookat_l    = glm::vec4(character_pos.x, 0.0f,character_pos.z,1.0f);
             camera_view_vector = camera_lookat_l - camera_position_c;
             camera_up_vector   = glm::vec4(0.0f,1.0f,0.0f,0.0f);
         } 
@@ -315,11 +315,11 @@ int main(int argc, char* argv[]) {
         float speed = 2.0;
         float resultDistance = speed * timeVariation;
 
-        movement_direction = glm::vec2(camera_view_vector.x/length_2, camera_view_vector.z/length_2);
+        movement_direction = glm::vec2(camera_view_vector.x / length_2, camera_view_vector.z / length_2);
         view_direction = glm::vec4(camera_view_vector.x / length_3,
-                                          camera_view_vector.y / length_3,
-                                          camera_view_vector.z / length_3,
-                                          0.0f);
+                                   camera_view_vector.y / length_3,
+                                   camera_view_vector.z / length_3,
+                                   0.0f);
 
         if (w_buttonPressed) {
             character_pos += glm::vec4(resultDistance * movement_direction.x, 0.0f, resultDistance * movement_direction.y, 0.0f);
@@ -342,7 +342,7 @@ int main(int argc, char* argv[]) {
         // Definimos o near, far e o field of view
         float nearplane = -0.5f;
         float farplane  = -30.0f;
-        float field_of_view = 3.141592 / 2.5f;
+        float field_of_view = 3.141592 / 3.0f;
         projection = Matrix_Perspective(field_of_view, g_ScreenRatio, nearplane, farplane);
         
         // ----- Objetos da Cena -----
@@ -362,9 +362,29 @@ int main(int argc, char* argv[]) {
         #define BULLET 5
         #define WALL 6
 
+        
+
+        // ----- Carrega as balas dos tiros -----
+        float bulletSpeed = 10.0;
+
+        for (int i = 0; i < bulletsOnScene.size(); i++) {
+            bulletsOnScene[i].position += glm::vec4(bulletsOnScene[i].direction.x * resultDistance * bulletSpeed, 
+                                                    bulletsOnScene[i].direction.y * resultDistance * bulletSpeed,
+                                                    bulletsOnScene[i].direction.z * resultDistance * bulletSpeed,
+                                                    0.0f);
+
+            // Desenhamos o modelo do BULLET - Fonte: Laboratorio 04
+            model = Matrix_Translate(bulletsOnScene[i].position.x, 
+                                     bulletsOnScene[i].position.y, 
+                                     bulletsOnScene[i].position.z) * Matrix_Scale(10.0f,10.0f,10.0f);
+            glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+            glUniform1i(object_id_uniform, BULLET);
+            DrawVirtualObject("bullet");
+        }
+
         if (!firstPersonMode) {
             // Desenhamos o modelo do mfour - Fonte: Laboratorio 04
-            model = Matrix_Translate(character_pos.x, character_pos.y, character_pos.z) * Matrix_Rotate_Y(g_CameraTheta + M_PI) *  Matrix_Scale(0.03f,0.03f,0.03f);
+            model = Matrix_Translate(character_pos.x, 0.0f, character_pos.z) * Matrix_Rotate_Y(g_CameraTheta + M_PI) *  Matrix_Scale(0.03f,0.03f,0.03f);
             glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
             glUniform1i(object_id_uniform, MFOUR);
             DrawVirtualObject("mfour");
@@ -393,12 +413,6 @@ int main(int argc, char* argv[]) {
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, BUNNY);
         DrawVirtualObject("bunny");
-
-        // Desenhamos o modelo do BULLET - Fonte: Laboratorio 04
-        model = Matrix_Scale(10.0f,10.0f,10.0f) * Matrix_Translate(0.07f,0.03f,0.0f);
-        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-        glUniform1i(object_id_uniform, BULLET);
-        DrawVirtualObject("bullet");
 
         model = Matrix_Scale(0.5f,0.5f,0.5f) * Matrix_Translate(4.0f,2.0f,0.0f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
@@ -971,7 +985,15 @@ double g_LastCursorPosX, g_LastCursorPosY;
 // Função callback chamada sempre que o usuário aperta algum dos botões do mouse FONTE: Laboratório 2
 void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 {
-    
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) 
+    {
+        Bullet newBullet;
+
+        newBullet.direction = view_direction;
+        newBullet.position = character_pos;
+
+        bulletsOnScene.push_back(newBullet);
+    }
 }
 
 // Função callback chamada sempre que o usuário movimentar o cursor do mouse em

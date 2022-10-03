@@ -206,8 +206,16 @@ int main(int argc, char* argv[]) {
     // Carregamos os shaders de vértices e de fragmentos que serão utilizados - FONTE: Laboratório 4
     LoadShadersFromFiles();
     // Carregamos duas imagens para serem utilizadas como textura - Fonte: Laboratorio 5
-    LoadTextureImage("../../data/textures/mfour_texture/SS2_SS2_BaseColor.png");      // TextureImage0
-    LoadTextureImage("../../data/textures/bullet_texture/9mm Luger Normal.png");      // TextureImage1
+    LoadTextureImage("../../data/textures/mfour_texture/SS2_SS2_BaseColor.png");      // MFOUR_TEXTURE1    
+    LoadTextureImage("../../data/textures/bullet_texture/9mm Luger Albedo.png");      // BULLET_TEXTURE1  
+    LoadTextureImage("../../data/textures/floor.jpg");      // FLOOR_TEXTURE1
+    LoadTextureImage("../../data/textures/wall.jpg");      // WALL_TEXTURE1
+    LoadTextureImage("../../data/textures/black.jpg");      // TextureImage1
+
+    // LoadTextureImage("../../data/textures/bullet_texture/9mm Luger Albedo.png");      // TextureImage2
+    // LoadTextureImage("../../data/textures/bullet_texture/9mm Luger Albedo.png");      // TextureImage3
+    // LoadTextureImage("../../data/textures/bullet_texture/9mm Luger Albedo.png");      // TextureImage4
+    // LoadTextureImage("../../data/textures/bullet_texture/9mm Luger Albedo.png");      // TextureImage5
 
     // Construímos a representação de objetos geométricos através de malhas de triângulos - FONTE: Laboratório 4
     ObjModel spheremodel("../../data/objects/sphere.obj");
@@ -221,6 +229,10 @@ int main(int argc, char* argv[]) {
     ObjModel planemodel("../../data/objects/plane.obj");
     ComputeNormals(&planemodel);
     BuildTrianglesAndAddToVirtualScene(&planemodel);
+    
+    ObjModel planewall("../../data/objects/wall.obj");
+    ComputeNormals(&planewall);
+    BuildTrianglesAndAddToVirtualScene(&planewall);
 
     ObjModel mfourmodel("../../data/objects/mfour.obj");
     ComputeNormals(&mfourmodel);
@@ -321,24 +333,31 @@ int main(int argc, char* argv[]) {
         #define BALOON 3
         #define MFOUR  4
         #define BULLET 5
+        #define WALL 6
 
         // Desenhamos o modelo da esfera - Fonte: Laboratorio 04
-        model = Matrix_Translate(-1.0f,0.0f,-6.0f);
+        model = Matrix_Translate(-1.0f,0.0f,-3.0f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, SPHERE);
         DrawVirtualObject("sphere");
 
         // Desenhamos o modelo do coelho - Fonte: Laboratorio 04
-        model = Matrix_Translate(1.0f,0.0f,-6.0f);
+        model = Matrix_Translate(1.0f,0.0f,-3.0f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, PLANE);
         DrawVirtualObject("plane");
-        
+
+        // Desenhamos o modelo do coelho - Fonte: Laboratorio 04
+        model = Matrix_Translate(1.0f,0.0f,2.0f);
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, WALL);
+        DrawVirtualObject("wall");
+
         // Desenhamos o modelo do baloon - Fonte: Laboratorio 04
         model = Matrix_Scale(0.5f,0.5f,0.5f) * Matrix_Translate(-3.0f,0.0f,0.0f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-        glUniform1i(object_id_uniform, BALOON);
-        DrawVirtualObject("baloon");
+        glUniform1i(object_id_uniform, BUNNY);
+        DrawVirtualObject("bunny");
 
         // Desenhamos o modelo do mfour - Fonte: Laboratorio 04
         model = Matrix_Scale(0.03f,0.03f,0.03f) * Matrix_Translate(10.0f,0.0f,0.0f);
@@ -346,11 +365,17 @@ int main(int argc, char* argv[]) {
         glUniform1i(object_id_uniform, MFOUR);
         DrawVirtualObject("mfour");
 
-         // Desenhamos o modelo do baloon - Fonte: Laboratorio 04
+        // Desenhamos o modelo do BULLET - Fonte: Laboratorio 04
         model = Matrix_Scale(10.0f,10.0f,10.0f) * Matrix_Translate(0.07f,0.0f,0.0f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-        glUniform1i(object_id_uniform, BUNNY);
+        glUniform1i(object_id_uniform, BULLET);
         DrawVirtualObject("bullet");
+
+        model = Matrix_Scale(0.5f,0.5f,0.5f) * Matrix_Translate(4.0f,0.0f,0.0f);
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, BALOON);
+        DrawVirtualObject("baloon");
+
 
         // O framebuffer onde OpenGL executa as operações de renderização não
         // é o mesmo que está sendo mostrado para o usuário, caso contrário
@@ -496,9 +521,16 @@ void LoadShadersFromFiles()
 
     // Variáveis em "shader_fragment.glsl" para acesso das imagens de textura
     glUseProgram(program_id);
-    glUniform1i(glGetUniformLocation(program_id, "TextureImage0"), 0);
-    glUniform1i(glGetUniformLocation(program_id, "TextureImage1"), 1);
-    glUniform1i(glGetUniformLocation(program_id, "TextureImage2"), 2);
+    glUniform1i(glGetUniformLocation(program_id, "MFOUR_TEXTURE1"), 0);
+    glUniform1i(glGetUniformLocation(program_id, "BULLET_TEXTURE1"), 1);
+    glUniform1i(glGetUniformLocation(program_id, "FLOOR_TEXTURE1"), 2);
+    glUniform1i(glGetUniformLocation(program_id, "WALL_TEXTURE1"), 3);
+    glUniform1i(glGetUniformLocation(program_id, "TextureImage1"), 4);
+    
+    // glUniform1i(glGetUniformLocation(program_id, "TextureImage2"), 2);
+    // glUniform1i(glGetUniformLocation(program_id, "TextureImage3"), 3);
+    // glUniform1i(glGetUniformLocation(program_id, "TextureImage4"), 4);
+    // glUniform1i(glGetUniformLocation(program_id, "TextureImage5"), 5);
     glUseProgram(0);
 }
 

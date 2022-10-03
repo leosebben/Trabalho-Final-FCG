@@ -31,6 +31,16 @@
 #include "utils.h"
 #include "matrices.h"
 
+#define M_PI_2 1.57079632679489661923
+
+bool direction = true;
+float triOffset = 0.0f;
+float triMaxOffset = 544.7f;
+float triIncrement = 0.0045f;
+bool changeXrot = true;
+bool changeYrot = true;
+bool changeZrot = true;
+
 // Estrutura que representa um modelo geométrico - Fonte Laboratorio 04
 struct ObjModel
 {
@@ -184,7 +194,9 @@ int main(int argc, char* argv[]) {
     glfwSetMouseButtonCallback(window, MouseButtonCallback);
     glfwSetCursorPosCallback(window, CursorPosCallback);
     glfwSetScrollCallback(window, ScrollCallback);
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    #ifdef TARGET_OS_X
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);// essa funcao quebra o mouse no linux
+    #endif
 
     // Função para redimensionar a tela. Fonte laboratório 2
     glfwSetFramebufferSizeCallback(window, FramebufferSizeCallback);
@@ -208,10 +220,15 @@ int main(int argc, char* argv[]) {
     LoadShadersFromFiles();
     // Carregamos duas imagens para serem utilizadas como textura - Fonte: Laboratorio 5
     LoadTextureImage("../../data/textures/mfour_texture/SS2_SS2_BaseColor.png");      // MFOUR_TEXTURE1    
-    LoadTextureImage("../../data/textures/bullet_texture/9mm Luger Albedo.png");      // BULLET_TEXTURE1  
-    LoadTextureImage("../../data/textures/floor.jpg");      // FLOOR_TEXTURE1
-    LoadTextureImage("../../data/textures/wall.jpg");      // WALL_TEXTURE1
+    LoadTextureImage("../../data/textures/bullet_texture/9mm Luger Albedo.png");      // BULLET_TEXTURE1
+    LoadTextureImage("../../data/textures/ambient/wall.png");      // WALL_TEXTURE1
     LoadTextureImage("../../data/textures/black.jpg");      // TextureImage1
+    LoadTextureImage("../../data/textures/ambient/wall_b.png");      // WALL_TEXTURE2
+    LoadTextureImage("../../data/textures/baloon_texture/red.png");      // BALOON_TEXTURE_RED
+    LoadTextureImage("../../data/textures/baloon_texture/yellow.png");      // BALOON_TEXTURE_YELLOW
+    LoadTextureImage("../../data/textures/baloon_texture/blue.png");      // BALOON_TEXTURE_BLUE
+    LoadTextureImage("../../data/textures/baloon_texture/blue.png");      // BALOON_TEXTURE_BLUE
+    LoadTextureImage("../../data/textures/sphere_txt.png");      // SPHERE_TEXTURE
 
     // Construímos a representação de objetos geométricos através de malhas de triângulos - FONTE: Laboratório 4
     ObjModel spheremodel("../../data/objects/sphere.obj");
@@ -226,9 +243,9 @@ int main(int argc, char* argv[]) {
     ComputeNormals(&planemodel);
     BuildTrianglesAndAddToVirtualScene(&planemodel);
     
-    // ObjModel planewall("../../data/objects/wall.obj");
-    // ComputeNormals(&planewall);
-    // BuildTrianglesAndAddToVirtualScene(&planewall);
+    ObjModel planewall("../../data/objects/wall.obj");
+    ComputeNormals(&planewall);
+    BuildTrianglesAndAddToVirtualScene(&planewall);
 
     ObjModel mfourmodel("../../data/objects/mfour.obj");
     ComputeNormals(&mfourmodel);
@@ -354,15 +371,15 @@ int main(int argc, char* argv[]) {
         glUniformMatrix4fv(view_uniform       , 1 , GL_FALSE , glm::value_ptr(view));
         glUniformMatrix4fv(projection_uniform , 1 , GL_FALSE , glm::value_ptr(projection));
 
-        #define SPHERE 0 // Fonte: Laboratorio 04
+        #define SPHERE 0
         #define BUNNY  1
         #define PLANE  2
-        #define BALOON 3
+        #define BALOON_RED 3
         #define MFOUR  4
         #define BULLET 5
         #define WALL 6
-
-        
+        #define BALOON_YELLOW 7
+        #define BALOON_BLUE 8
 
         // ----- Carrega as balas dos tiros -----
         float bulletSpeed = 10.0;
@@ -396,28 +413,171 @@ int main(int argc, char* argv[]) {
         glUniform1i(object_id_uniform, SPHERE);
         DrawVirtualObject("sphere");
 
-        // Desenhamos o modelo do coelho - Fonte: Laboratorio 04
-        model = Matrix_Scale(15.0f,15.0f,15.0f) *  Matrix_Translate(0.0f,0.0f,0.0f);
+        if (direction)
+		{
+			triOffset += triIncrement;
+		}
+		else {
+			triOffset -= triIncrement;
+		}
+
+		if (abs(triOffset) >= triMaxOffset)
+		{
+			direction = !direction;
+		}
+
+        // Desenhamos o modelo do chao
+        model = Matrix_Scale(15.0f,15.0f,15.0f) *  Matrix_Translate(0.0f,-0.025f,0.0f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, PLANE);
         DrawVirtualObject("plane");
 
-        // Desenhamos o modelo do coelho - Fonte: Laboratorio 04
-        // model = Matrix_Scale(5.0f,5.0f,5.0f) * Matrix_Translate(1.0f,0.0f,2.0f);
-        // glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-        // glUniform1i(object_id_uniform, WALL);
-        // DrawVirtualObject("wall");
+        // Desenhamos o modelo do parede 01
+        model = Matrix_Rotate_Z(M_PI_2) * Matrix_Translate(2.0f,-15.0f,0.0f) * Matrix_Scale(3.0f,1.0f,15.0f) ;
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, WALL);
+        DrawVirtualObject("wall");
 
-        // Desenhamos o modelo do baloon - Fonte: Laboratorio 04
-        model = Matrix_Translate(-3.0f,2.0f,0.0f);
+        // Desenhamos o modelo do parede 02
+        model = Matrix_Rotate_Z(-M_PI_2) * Matrix_Translate(-2.0f,-15.0f,0.0f) * Matrix_Scale(3.0f,1.0f,15.0f) ;
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, WALL);
+        DrawVirtualObject("wall");
+
+        // Desenhamos o modelo do parede 03
+        model = Matrix_Rotate_X(-M_PI_2) *  Matrix_Rotate_Y(-M_PI_2) * Matrix_Translate(2.0f,-15.0f,0.0f) * Matrix_Scale(3.0f,1.0f,15.0f) ;
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, WALL);
+        DrawVirtualObject("wall");
+
+        // Desenhamos o modelo do parede 04
+        model = Matrix_Rotate_X(M_PI_2) *  Matrix_Rotate_Y(M_PI_2) * Matrix_Translate(2.0f,-15.0f,0.0f) * Matrix_Scale(3.0f,1.0f,15.0f) ;
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, WALL);
+        DrawVirtualObject("wall");
+
+        // Desenhamos o modelo do mfour
+        model = Matrix_Scale(0.03f,0.03f,0.03f) * Matrix_Translate(10.0f,17.0f,0.0f);
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, MFOUR);
+        DrawVirtualObject("mfour");
+
+        // Desenhamos o modelo do BULLET
+        model = Matrix_Scale(10.0f,10.0f,10.0f) * Matrix_Translate(0.07f,0.03f,0.0f);
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, BULLET);
+        DrawVirtualObject("bullet");
+
+        // Desenhamos o modelo do balao verde
+        model = Matrix_Scale(0.5f,0.5f,0.5f) * Matrix_Translate(-7.0f,3.0f,-5.0f);
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, BALOON_RED);
+        DrawVirtualObject("baloon");
+
+        // Desenhamos o modelo do balao amarelo
+        model = Matrix_Scale(0.5f,0.5f,0.5f) * Matrix_Translate(-7.0f,3.0f,0.0f);
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, BALOON_YELLOW);
+        DrawVirtualObject("baloon");
+
+        // Desenhamos o modelo do balao azul
+        model = Matrix_Scale(0.5f,0.5f,0.5f) * Matrix_Translate(-7.0f,3.0f,5.0f);
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, BALOON_BLUE);
+        DrawVirtualObject("baloon");
+
+        // Desenhamos o modelo do coelhor - estatico
+        {        
+        if (changeXrot && changeYrot && changeZrot)
+        model = Matrix_Translate(-9.4f,2.0f,-9.4f)  * Matrix_Rotate_X(triOffset) * Matrix_Rotate_Y(triOffset) * Matrix_Rotate_Z(triOffset);
+        else if (!changeXrot && changeYrot && changeZrot)
+        model = Matrix_Translate(-9.4f,2.0f,-9.4f) * Matrix_Rotate_Y(triOffset) * Matrix_Rotate_Z(triOffset);
+        else if (changeXrot && !changeYrot && changeZrot)
+        model = Matrix_Translate(-9.4f,2.0f,-9.4f) * Matrix_Rotate_X(triOffset) * Matrix_Rotate_Z(triOffset);
+        else if (changeXrot && changeYrot && !changeZrot)
+        model = Matrix_Translate(-9.4f,2.0f,-9.4f) * Matrix_Rotate_X(triOffset) * Matrix_Rotate_Y(triOffset);
+        else if (!changeXrot && !changeYrot && changeZrot)
+        model = Matrix_Translate(-9.4f,2.0f,-9.4f) * Matrix_Rotate_Z(triOffset);
+        else if (!changeXrot && changeYrot && !changeZrot)
+        model = Matrix_Translate(-9.4f,2.0f,-9.4f) * Matrix_Rotate_Y(triOffset);
+        else if (changeXrot && !changeYrot && !changeZrot)
+        model = Matrix_Translate(-9.4f,2.0f,-9.4f) * Matrix_Rotate_X(triOffset);
+        else if (!changeXrot && !changeYrot && !changeZrot)   
+        model = Matrix_Translate(-9.4f,2.0f,-9.4f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, BUNNY);
         DrawVirtualObject("bunny");
+        }
 
-        model = Matrix_Scale(0.5f,0.5f,0.5f) * Matrix_Translate(4.0f,2.0f,0.0f);
+        // Desenhamos o modelo da esferar - estatica
+        {
+        if (changeXrot && changeYrot && changeZrot)
+        model = Matrix_Translate(9.4f,2.0f,9.4f) * Matrix_Rotate_X(triOffset) * Matrix_Rotate_Y(triOffset) * Matrix_Rotate_Z(triOffset);
+        else if (!changeXrot && changeYrot && changeZrot)
+        model = Matrix_Translate(9.4f,2.0f,9.4f) * Matrix_Rotate_Y(triOffset) * Matrix_Rotate_Z(triOffset);
+        else if (changeXrot && !changeYrot && changeZrot)
+        model = Matrix_Translate(9.4f,2.0f,9.4f) * Matrix_Rotate_X(triOffset) * Matrix_Rotate_Z(triOffset);
+        else if (changeXrot && changeYrot && !changeZrot)
+        model = Matrix_Translate(9.4f,2.0f,9.4f) * Matrix_Rotate_X(triOffset) * Matrix_Rotate_Y(triOffset);
+        else if (!changeXrot && !changeYrot && changeZrot)
+        model = Matrix_Translate(9.4f,2.0f,9.4f) * Matrix_Rotate_Z(triOffset);
+        else if (!changeXrot && changeYrot && !changeZrot)
+        model = Matrix_Translate(9.4f,2.0f,9.4f) * Matrix_Rotate_Y(triOffset);
+        else if (changeXrot && !changeYrot && !changeZrot)
+        model = Matrix_Translate(9.4f,2.0f,9.4f) * Matrix_Rotate_X(triOffset);
+        else if (!changeXrot && !changeYrot && !changeZrot)   
+        model = Matrix_Translate(9.4f,2.0f,9.4f) ;
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-        glUniform1i(object_id_uniform, BALOON);
-        DrawVirtualObject("baloon");
+        glUniform1i(object_id_uniform, SPHERE);
+        DrawVirtualObject("sphere");
+        }
+
+        // Desenhamos o modelo do mfour - estatica
+        {
+        if (changeXrot && changeYrot && changeZrot)
+        model = Matrix_Scale(0.03f,0.03f,0.03f) * Matrix_Translate(-310.4f,62.0f,310.4f) * Matrix_Rotate_X(triOffset) * Matrix_Rotate_Y(triOffset) * Matrix_Rotate_Z(triOffset);
+        else if (!changeXrot && changeYrot && changeZrot)
+        model = Matrix_Scale(0.03f,0.03f,0.03f) * Matrix_Translate(-310.4f,62.0f,310.4f) * Matrix_Rotate_Y(triOffset) * Matrix_Rotate_Z(triOffset);
+        else if (changeXrot && !changeYrot && changeZrot)
+        model = Matrix_Scale(0.03f,0.03f,0.03f) * Matrix_Translate(-310.4f,62.0f,310.4f) * Matrix_Rotate_X(triOffset) * Matrix_Rotate_Z(triOffset);
+        else if (changeXrot && changeYrot && !changeZrot)
+        model = Matrix_Scale(0.03f,0.03f,0.03f) * Matrix_Translate(-310.4f,62.0f,310.4f) * Matrix_Rotate_X(triOffset) * Matrix_Rotate_Y(triOffset);
+        else if (!changeXrot && !changeYrot && changeZrot)
+        model = Matrix_Scale(0.03f,0.03f,0.03f) * Matrix_Translate(-310.4f,62.0f,310.4f) * Matrix_Rotate_Z(triOffset);
+        else if (!changeXrot && changeYrot && !changeZrot)
+        model = Matrix_Scale(0.03f,0.03f,0.03f) * Matrix_Translate(-310.4f,62.0f,310.4f) * Matrix_Rotate_Y(triOffset);
+        else if (changeXrot && !changeYrot && !changeZrot)
+        model = Matrix_Scale(0.03f,0.03f,0.03f) * Matrix_Translate(-310.4f,62.0f,310.4f) * Matrix_Rotate_X(triOffset);
+        else if (!changeXrot && !changeYrot && !changeZrot)   
+        model = Matrix_Scale(0.03f,0.03f,0.03f) * Matrix_Translate(-310.4f,62.0f,310.4f) ;
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, MFOUR);
+        DrawVirtualObject("mfour");
+        }
+
+        {// Desenhamos o modelo do BULLET - estatica
+        if (changeXrot && changeYrot && changeZrot)
+        model = Matrix_Scale(20.0f,20.0f,20.0f) * Matrix_Translate(0.44f,0.10f,-0.44f) * Matrix_Rotate_X(triOffset) * Matrix_Rotate_Y(triOffset) * Matrix_Rotate_Z(triOffset);
+        else if (!changeXrot && changeYrot && changeZrot)
+        model = Matrix_Scale(20.0f,20.0f,20.0f) * Matrix_Translate(0.44f,0.10f,-0.44f) * Matrix_Rotate_Y(triOffset) * Matrix_Rotate_Z(triOffset);
+        else if (changeXrot && !changeYrot && changeZrot)
+        model = Matrix_Scale(20.0f,20.0f,20.0f) * Matrix_Translate(0.44f,0.10f,-0.44f) * Matrix_Rotate_X(triOffset) * Matrix_Rotate_Z(triOffset);
+        else if (changeXrot && changeYrot && !changeZrot)
+        model = Matrix_Scale(20.0f,20.0f,20.0f) * Matrix_Translate(0.44f,0.10f,-0.44f) * Matrix_Rotate_X(triOffset) * Matrix_Rotate_Y(triOffset);
+        else if (!changeXrot && !changeYrot && changeZrot)
+        model = Matrix_Scale(20.0f,20.0f,20.0f) * Matrix_Translate(0.44f,0.10f,-0.44f) * Matrix_Rotate_Z(triOffset);
+        else if (!changeXrot && changeYrot && !changeZrot)
+        model = Matrix_Scale(20.0f,20.0f,20.0f) * Matrix_Translate(0.44f,0.10f,-0.44f) * Matrix_Rotate_Y(triOffset);
+        else if (changeXrot && !changeYrot && !changeZrot)
+        model = Matrix_Scale(20.0f,20.0f,20.0f) * Matrix_Translate(0.44f,0.10f,-0.44f) * Matrix_Rotate_X(triOffset);
+        else if (!changeXrot && !changeYrot && !changeZrot)   
+        model = Matrix_Scale(20.0f,20.0f,20.0f) * Matrix_Translate(0.44f,0.10f,-0.44f);
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, BULLET);
+        DrawVirtualObject("bullet");
+        }
+
+
 
 
         // O framebuffer onde OpenGL executa as operações de renderização não
@@ -566,14 +726,13 @@ void LoadShadersFromFiles()
     glUseProgram(program_id);
     glUniform1i(glGetUniformLocation(program_id, "MFOUR_TEXTURE1"), 0);
     glUniform1i(glGetUniformLocation(program_id, "BULLET_TEXTURE1"), 1);
-    glUniform1i(glGetUniformLocation(program_id, "FLOOR_TEXTURE1"), 2);
-    glUniform1i(glGetUniformLocation(program_id, "WALL_TEXTURE1"), 3);
-    glUniform1i(glGetUniformLocation(program_id, "TextureImage1"), 4);
-    
-    // glUniform1i(glGetUniformLocation(program_id, "TextureImage2"), 2);
-    // glUniform1i(glGetUniformLocation(program_id, "TextureImage3"), 3);
-    // glUniform1i(glGetUniformLocation(program_id, "TextureImage4"), 4);
-    // glUniform1i(glGetUniformLocation(program_id, "TextureImage5"), 5);
+    glUniform1i(glGetUniformLocation(program_id, "WALL_TEXTURE1"), 2);
+    glUniform1i(glGetUniformLocation(program_id, "TextureImage1"), 3);
+    glUniform1i(glGetUniformLocation(program_id, "WALL_TEXTURE2"), 4);
+    glUniform1i(glGetUniformLocation(program_id, "BALOON_TEXTURE_RED"), 5);
+    glUniform1i(glGetUniformLocation(program_id, "BALOON_TEXTURE_YELLOW"), 6);
+    glUniform1i(glGetUniformLocation(program_id, "BALOON_TEXTURE_BLUE"), 7);
+    glUniform1i(glGetUniformLocation(program_id, "SPHERE_TEXTURE"), 7);
     glUseProgram(0);
 }
 

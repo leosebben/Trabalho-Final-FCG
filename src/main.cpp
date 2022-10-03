@@ -222,9 +222,9 @@ int main(int argc, char* argv[]) {
     ComputeNormals(&planemodel);
     BuildTrianglesAndAddToVirtualScene(&planemodel);
     
-    ObjModel planewall("../../data/objects/wall.obj");
-    ComputeNormals(&planewall);
-    BuildTrianglesAndAddToVirtualScene(&planewall);
+    // ObjModel planewall("../../data/objects/wall.obj");
+    // ComputeNormals(&planewall);
+    // BuildTrianglesAndAddToVirtualScene(&planewall);
 
     ObjModel mfourmodel("../../data/objects/mfour.obj");
     ComputeNormals(&mfourmodel);
@@ -310,7 +310,7 @@ int main(int argc, char* argv[]) {
 
         // Definimos o near, far e o field of view
         float nearplane = -1.0f;
-        float farplane  = -20.0f;
+        float farplane  = -40.0f;
         float field_of_view = 3.141592 / 3.0f;
         projection = Matrix_Perspective(field_of_view, g_ScreenRatio, nearplane, farplane);
         
@@ -336,16 +336,16 @@ int main(int argc, char* argv[]) {
         DrawVirtualObject("sphere");
 
         // Desenhamos o modelo do coelho - Fonte: Laboratorio 04
-        model = Matrix_Scale(5.5f,5.5f,5.5f) *  Matrix_Translate(0.0f,0.0f,0.0f);
+        model = Matrix_Scale(15.0f,15.0f,15.0f) *  Matrix_Translate(0.0f,0.0f,0.0f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, PLANE);
         DrawVirtualObject("plane");
 
         // Desenhamos o modelo do coelho - Fonte: Laboratorio 04
-        model = Matrix_Scale(5.0f,5.0f,5.0f) * Matrix_Translate(1.0f,0.0f,2.0f);
-        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-        glUniform1i(object_id_uniform, WALL);
-        DrawVirtualObject("wall");
+        // model = Matrix_Scale(5.0f,5.0f,5.0f) * Matrix_Translate(1.0f,0.0f,2.0f);
+        // glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        // glUniform1i(object_id_uniform, WALL);
+        // DrawVirtualObject("wall");
 
         // Desenhamos o modelo do baloon - Fonte: Laboratorio 04
         model = Matrix_Translate(-3.0f,2.0f,0.0f);

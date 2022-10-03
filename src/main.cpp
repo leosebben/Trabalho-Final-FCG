@@ -33,6 +33,14 @@
 
 #define M_PI_2 1.57079632679489661923
 
+bool direction = true;
+float triOffset = 0.0f;
+float triMaxOffset = 544.7f;
+float triIncrement = 0.0045f;
+bool changeXrot = true;
+bool changeYrot = true;
+bool changeZrot = true;
+
 // Estrutura que representa um modelo geométrico - Fonte Laboratorio 04
 struct ObjModel
 {
@@ -340,11 +348,18 @@ int main(int argc, char* argv[]) {
         #define BALOON_YELLOW 7
         #define BALOON_BLUE 8
 
-        // Desenhamos o modelo da esfera - Fonte: Laboratorio 04
-        model = Matrix_Translate(-1.0f,2.0f,10.0f);
-        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-        glUniform1i(object_id_uniform, SPHERE);
-        DrawVirtualObject("sphere");
+        if (direction)
+		{
+			triOffset += triIncrement;
+		}
+		else {
+			triOffset -= triIncrement;
+		}
+
+		if (abs(triOffset) >= triMaxOffset)
+		{
+			direction = !direction;
+		}
 
         // Desenhamos o modelo do chao
         model = Matrix_Scale(15.0f,15.0f,15.0f) *  Matrix_Translate(0.0f,-0.025f,0.0f);
@@ -376,12 +391,6 @@ int main(int argc, char* argv[]) {
         glUniform1i(object_id_uniform, WALL);
         DrawVirtualObject("wall");
 
-        // Desenhamos o modelo do coelho - Fonte: Laboratorio 04
-        model = Matrix_Translate(-3.0f,2.0f,10.0f);
-        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-        glUniform1i(object_id_uniform, BUNNY);
-        DrawVirtualObject("bunny");
-
         // Desenhamos o modelo do mfour
         model = Matrix_Scale(0.03f,0.03f,0.03f) * Matrix_Translate(10.0f,17.0f,0.0f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
@@ -411,6 +420,99 @@ int main(int argc, char* argv[]) {
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, BALOON_BLUE);
         DrawVirtualObject("baloon");
+
+        // Desenhamos o modelo do coelhor - estatico
+        {        
+        if (changeXrot && changeYrot && changeZrot)
+        model = Matrix_Translate(-9.4f,2.0f,-9.4f)  * Matrix_Rotate_X(triOffset) * Matrix_Rotate_Y(triOffset) * Matrix_Rotate_Z(triOffset);
+        else if (!changeXrot && changeYrot && changeZrot)
+        model = Matrix_Translate(-9.4f,2.0f,-9.4f) * Matrix_Rotate_Y(triOffset) * Matrix_Rotate_Z(triOffset);
+        else if (changeXrot && !changeYrot && changeZrot)
+        model = Matrix_Translate(-9.4f,2.0f,-9.4f) * Matrix_Rotate_X(triOffset) * Matrix_Rotate_Z(triOffset);
+        else if (changeXrot && changeYrot && !changeZrot)
+        model = Matrix_Translate(-9.4f,2.0f,-9.4f) * Matrix_Rotate_X(triOffset) * Matrix_Rotate_Y(triOffset);
+        else if (!changeXrot && !changeYrot && changeZrot)
+        model = Matrix_Translate(-9.4f,2.0f,-9.4f) * Matrix_Rotate_Z(triOffset);
+        else if (!changeXrot && changeYrot && !changeZrot)
+        model = Matrix_Translate(-9.4f,2.0f,-9.4f) * Matrix_Rotate_Y(triOffset);
+        else if (changeXrot && !changeYrot && !changeZrot)
+        model = Matrix_Translate(-9.4f,2.0f,-9.4f) * Matrix_Rotate_X(triOffset);
+        else if (!changeXrot && !changeYrot && !changeZrot)   
+        model = Matrix_Translate(-9.4f,2.0f,-9.4f);
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, BUNNY);
+        DrawVirtualObject("bunny");
+        }
+
+        // Desenhamos o modelo da esferar - estatica
+        {
+        if (changeXrot && changeYrot && changeZrot)
+        model = Matrix_Translate(9.4f,2.0f,9.4f) * Matrix_Rotate_X(triOffset) * Matrix_Rotate_Y(triOffset) * Matrix_Rotate_Z(triOffset);
+        else if (!changeXrot && changeYrot && changeZrot)
+        model = Matrix_Translate(9.4f,2.0f,9.4f) * Matrix_Rotate_Y(triOffset) * Matrix_Rotate_Z(triOffset);
+        else if (changeXrot && !changeYrot && changeZrot)
+        model = Matrix_Translate(9.4f,2.0f,9.4f) * Matrix_Rotate_X(triOffset) * Matrix_Rotate_Z(triOffset);
+        else if (changeXrot && changeYrot && !changeZrot)
+        model = Matrix_Translate(9.4f,2.0f,9.4f) * Matrix_Rotate_X(triOffset) * Matrix_Rotate_Y(triOffset);
+        else if (!changeXrot && !changeYrot && changeZrot)
+        model = Matrix_Translate(9.4f,2.0f,9.4f) * Matrix_Rotate_Z(triOffset);
+        else if (!changeXrot && changeYrot && !changeZrot)
+        model = Matrix_Translate(9.4f,2.0f,9.4f) * Matrix_Rotate_Y(triOffset);
+        else if (changeXrot && !changeYrot && !changeZrot)
+        model = Matrix_Translate(9.4f,2.0f,9.4f) * Matrix_Rotate_X(triOffset);
+        else if (!changeXrot && !changeYrot && !changeZrot)   
+        model = Matrix_Translate(9.4f,2.0f,9.4f) ;
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, SPHERE);
+        DrawVirtualObject("sphere");
+        }
+
+        // Desenhamos o modelo do mfour - estatica
+        {
+        if (changeXrot && changeYrot && changeZrot)
+        model = Matrix_Scale(0.03f,0.03f,0.03f) * Matrix_Translate(-310.4f,62.0f,310.4f) * Matrix_Rotate_X(triOffset) * Matrix_Rotate_Y(triOffset) * Matrix_Rotate_Z(triOffset);
+        else if (!changeXrot && changeYrot && changeZrot)
+        model = Matrix_Scale(0.03f,0.03f,0.03f) * Matrix_Translate(-310.4f,62.0f,310.4f) * Matrix_Rotate_Y(triOffset) * Matrix_Rotate_Z(triOffset);
+        else if (changeXrot && !changeYrot && changeZrot)
+        model = Matrix_Scale(0.03f,0.03f,0.03f) * Matrix_Translate(-310.4f,62.0f,310.4f) * Matrix_Rotate_X(triOffset) * Matrix_Rotate_Z(triOffset);
+        else if (changeXrot && changeYrot && !changeZrot)
+        model = Matrix_Scale(0.03f,0.03f,0.03f) * Matrix_Translate(-310.4f,62.0f,310.4f) * Matrix_Rotate_X(triOffset) * Matrix_Rotate_Y(triOffset);
+        else if (!changeXrot && !changeYrot && changeZrot)
+        model = Matrix_Scale(0.03f,0.03f,0.03f) * Matrix_Translate(-310.4f,62.0f,310.4f) * Matrix_Rotate_Z(triOffset);
+        else if (!changeXrot && changeYrot && !changeZrot)
+        model = Matrix_Scale(0.03f,0.03f,0.03f) * Matrix_Translate(-310.4f,62.0f,310.4f) * Matrix_Rotate_Y(triOffset);
+        else if (changeXrot && !changeYrot && !changeZrot)
+        model = Matrix_Scale(0.03f,0.03f,0.03f) * Matrix_Translate(-310.4f,62.0f,310.4f) * Matrix_Rotate_X(triOffset);
+        else if (!changeXrot && !changeYrot && !changeZrot)   
+        model = Matrix_Scale(0.03f,0.03f,0.03f) * Matrix_Translate(-310.4f,62.0f,310.4f) ;
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, MFOUR);
+        DrawVirtualObject("mfour");
+        }
+
+        {// Desenhamos o modelo do BULLET - estatica
+        if (changeXrot && changeYrot && changeZrot)
+        model = Matrix_Scale(20.0f,20.0f,20.0f) * Matrix_Translate(0.44f,0.10f,-0.44f) * Matrix_Rotate_X(triOffset) * Matrix_Rotate_Y(triOffset) * Matrix_Rotate_Z(triOffset);
+        else if (!changeXrot && changeYrot && changeZrot)
+        model = Matrix_Scale(20.0f,20.0f,20.0f) * Matrix_Translate(0.44f,0.10f,-0.44f) * Matrix_Rotate_Y(triOffset) * Matrix_Rotate_Z(triOffset);
+        else if (changeXrot && !changeYrot && changeZrot)
+        model = Matrix_Scale(20.0f,20.0f,20.0f) * Matrix_Translate(0.44f,0.10f,-0.44f) * Matrix_Rotate_X(triOffset) * Matrix_Rotate_Z(triOffset);
+        else if (changeXrot && changeYrot && !changeZrot)
+        model = Matrix_Scale(20.0f,20.0f,20.0f) * Matrix_Translate(0.44f,0.10f,-0.44f) * Matrix_Rotate_X(triOffset) * Matrix_Rotate_Y(triOffset);
+        else if (!changeXrot && !changeYrot && changeZrot)
+        model = Matrix_Scale(20.0f,20.0f,20.0f) * Matrix_Translate(0.44f,0.10f,-0.44f) * Matrix_Rotate_Z(triOffset);
+        else if (!changeXrot && changeYrot && !changeZrot)
+        model = Matrix_Scale(20.0f,20.0f,20.0f) * Matrix_Translate(0.44f,0.10f,-0.44f) * Matrix_Rotate_Y(triOffset);
+        else if (changeXrot && !changeYrot && !changeZrot)
+        model = Matrix_Scale(20.0f,20.0f,20.0f) * Matrix_Translate(0.44f,0.10f,-0.44f) * Matrix_Rotate_X(triOffset);
+        else if (!changeXrot && !changeYrot && !changeZrot)   
+        model = Matrix_Scale(20.0f,20.0f,20.0f) * Matrix_Translate(0.44f,0.10f,-0.44f);
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, BULLET);
+        DrawVirtualObject("bullet");
+        }
+
+
 
 
         // O framebuffer onde OpenGL executa as operações de renderização não
@@ -1060,6 +1162,18 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
 
     if (key == GLFW_KEY_SPACE && action == GLFW_PRESS) {
         firstPersonMode = !firstPersonMode;
+    }
+
+    if (key == GLFW_KEY_J && action == GLFW_PRESS) {
+        changeXrot = !changeXrot;
+    }
+
+    if (key == GLFW_KEY_K && action == GLFW_PRESS) {
+        changeYrot = !changeYrot;
+    }
+
+    if (key == GLFW_KEY_L && action == GLFW_PRESS) {
+        changeZrot = !changeZrot;
     }
 
     // Torna movimento baseado no tempo

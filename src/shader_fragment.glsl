@@ -83,37 +83,20 @@ void main()
     float U = 0.0;
     float V = 0.0;
 
-    // if ( object_id == SPHERE )
-    // {
-    //     // PREENCHA AQUI as coordenadas de textura da esfera, computadas com
-    //     // projeção esférica EM COORDENADAS DO MODELO. Utilize como referência
-    //     // o slides 134-150 do documento Aula_20_Mapeamento_de_Texturas.pdf.
-    //     // A esfera que define a projeção deve estar centrada na posição
-    //     // "bbox_center" definida abaixo.
+    if ( object_id == SPHERE )
+     {// projeção esférica
 
-    //     // Você deve utilizar:
-    //     //   função 'length( )' : comprimento Euclidiano de um vetor
-    //     //   função 'atan( , )' : arcotangente. Veja https://en.wikipedia.org/wiki/Atan2.
-    //     //   função 'asin( )'   : seno inverso.
-    //     //   constante M_PI
-    //     //   variável position_model
-
-    //     // vec4 bbox_center = (bbox_min + bbox_max) / 2.0;
-    //     // // novo codigo a seguir
-
-    //     // vec4 new_vector = position_model - bbox_center;
-    //     // float vx = new_vector.x;
-    //     // float vy = new_vector.y;
-    //     // float vz = new_vector.z;
-    //     // float rho = length(new_vector);
-    //     // float theta = atan(vx, vz);
-    //     // float phi = asin(vy / rho);
-    //     // U = (theta + M_PI) / (2 * M_PI);
-    //     // V = (phi + M_PI_2) / M_PI;
-
-    //     U = texcoords.x;
-    //     V = texcoords.y;
-    // }
+        vec4 bbox_center = (bbox_min + bbox_max) / 2.0;
+        vec4 new_vector = position_model - bbox_center;
+        float vx = new_vector.x;
+        float vy = new_vector.y;
+        float vz = new_vector.z;
+        float rho = length(new_vector);
+        float theta = atan(vx, vz);
+        float phi = asin(vy / rho);
+        U = (theta + M_PI) / (2 * M_PI);
+        V = (phi + M_PI_2) / M_PI;
+    }
     // else if ( object_id == BUNNY )
     // {
     //     // PREENCHA AQUI as coordenadas de textura do coelho, computadas com
@@ -142,10 +125,8 @@ void main()
     //     U = texcoords.x;
     //     V = texcoords.y;
 
-    // }
-
-    
-    if ( object_id == BULLET ||  object_id == BALOON_RED  ||  object_id == PLANE ||  object_id == WALL || object_id ==  MFOUR ||  object_id == SPHERE ||  object_id == BUNNY ||  object_id == BALOON_YELLOW   ||  object_id == BALOON_BLUE  )
+    // }    
+    if ( object_id == BULLET ||  object_id == BALOON_RED  ||  object_id == PLANE ||  object_id == WALL || object_id ==  MFOUR ||  object_id == BUNNY ||  object_id == BALOON_YELLOW   ||  object_id == BALOON_BLUE  )
     {
         // Coordenadas de textura do plano, obtidas do arquivo OBJ.
         U = texcoords.x;

@@ -1234,6 +1234,20 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
         bulletSpeed = 20.0;
     }
 
+    // ----- Transformacao Geometrica -----
+
+    if (key == GLFW_KEY_J && action == GLFW_PRESS) {
+        changeXrot = !changeXrot;
+    }
+
+    if (key == GLFW_KEY_K && action == GLFW_PRESS) {
+        changeYrot = !changeYrot;
+    }
+
+    if (key == GLFW_KEY_L && action == GLFW_PRESS) {
+        changeZrot = !changeZrot;
+    }
+
     // ----- Câmera e Movimento -----
 
     // Se o usuário pressionar a tecla W, movimenta-se para frente

@@ -362,11 +362,13 @@ int main(int argc, char* argv[]) {
         #define BULLET 5
         #define WALL 6
 
-        // Desenhamos o modelo do mfour - Fonte: Laboratorio 04
-        model = Matrix_Translate(character_pos.x, character_pos.y, character_pos.z) * Matrix_Rotate_Y(g_CameraTheta + M_PI) *  Matrix_Scale(0.03f,0.03f,0.03f);
-        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-        glUniform1i(object_id_uniform, MFOUR);
-        DrawVirtualObject("mfour");
+        if (!firstPersonMode) {
+            // Desenhamos o modelo do mfour - Fonte: Laboratorio 04
+            model = Matrix_Translate(character_pos.x, character_pos.y, character_pos.z) * Matrix_Rotate_Y(g_CameraTheta + M_PI) *  Matrix_Scale(0.03f,0.03f,0.03f);
+            glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+            glUniform1i(object_id_uniform, MFOUR);
+            DrawVirtualObject("mfour");
+        }
 
         // Desenhamos o modelo da esfera - Fonte: Laboratorio 04
         model = Matrix_Translate(-1.0f,2.0f,-3.0f);

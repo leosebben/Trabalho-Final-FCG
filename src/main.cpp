@@ -154,6 +154,7 @@ bool firstPersonMode = false;
 
 // ----- Atirar -----
 std::vector<Bullet> bulletsOnScene;
+float bulletSpeed = 10.0;
 
 int main(int argc, char* argv[]) {
     // Inicializamos a biblioteca GLFW. Fonte laboratório 2
@@ -382,7 +383,6 @@ int main(int argc, char* argv[]) {
         #define BALOON_BLUE 8
 
         // ----- Carrega as balas dos tiros -----
-        float bulletSpeed = 0.5;
 
         for (int i = 0; i < bulletsOnScene.size(); i++) {
             bulletsOnScene[i].position += glm::vec4(bulletsOnScene[i].direction.x * resultDistance * bulletSpeed, 
@@ -1201,6 +1201,14 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
 
     if (key == GLFW_KEY_SPACE && action == GLFW_PRESS) {
         firstPersonMode = !firstPersonMode;
+    }
+
+    if (key == GLFW_KEY_F && action == GLFW_PRESS) {
+        bulletSpeed = 10.0;
+    }
+
+    if (key == GLFW_KEY_G && action == GLFW_PRESS) {
+        bulletSpeed = 0.5;
     }
 
     // ----- Câmera e Movimento -----

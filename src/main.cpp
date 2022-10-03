@@ -424,7 +424,11 @@ int main(int argc, char* argv[]) {
 
         if (!firstPersonMode) {
             // Desenhamos o modelo do mfour - Fonte: Laboratorio 04
-            model = Matrix_Translate(character_pos.x, character_pos.y, character_pos.z) * Matrix_Rotate_Y(g_CameraTheta + M_PI) *  Matrix_Scale(0.03f,0.03f,0.03f);
+            if (!rotate_character) {
+                model = Matrix_Translate(character_pos.x, character_pos.y, character_pos.z) *  Matrix_Scale(0.03f,0.03f,0.03f);
+            } else {
+                model = Matrix_Translate(character_pos.x, character_pos.y, character_pos.z) * Matrix_Rotate_Y(g_CameraTheta + M_PI) *  Matrix_Scale(0.03f,0.03f,0.03f);
+            }
             glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
             glUniform1i(object_id_uniform, MFOUR);
             DrawVirtualObject("mfour");
@@ -1233,12 +1237,20 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
         firstPersonMode = !firstPersonMode;
     }
 
+    // ----- Controle da Velocidade da Bala -----
+
     if (key == GLFW_KEY_F && action == GLFW_PRESS) {
         bulletSpeed = 2.0;
     }
 
     if (key == GLFW_KEY_G && action == GLFW_PRESS) {
         bulletSpeed = 20.0;
+    }
+
+    // ----- Controle da Câmera -----
+
+    if (key == GLFW_KEY_R && action == GLFW_PRESS) {
+        rotate_character = !rotate_character;
     }
 
     // ----- Transformacao Geometrica -----

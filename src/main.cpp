@@ -336,42 +336,42 @@ int main(int argc, char* argv[]) {
         #define WALL 6
 
         // Desenhamos o modelo da esfera - Fonte: Laboratorio 04
-        model = Matrix_Translate(-1.0f,0.0f,-3.0f);
+        model = Matrix_Translate(-1.0f,2.0f,-3.0f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, SPHERE);
         DrawVirtualObject("sphere");
 
         // Desenhamos o modelo do coelho - Fonte: Laboratorio 04
-        model = Matrix_Translate(1.0f,0.0f,-3.0f);
+        model = Matrix_Scale(5.5f,5.5f,5.5f) *  Matrix_Translate(0.0f,0.0f,0.0f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, PLANE);
         DrawVirtualObject("plane");
 
         // Desenhamos o modelo do coelho - Fonte: Laboratorio 04
-        model = Matrix_Translate(1.0f,0.0f,2.0f);
+        model = Matrix_Scale(5.0f,5.0f,5.0f) * Matrix_Translate(1.0f,0.0f,2.0f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, WALL);
         DrawVirtualObject("wall");
 
         // Desenhamos o modelo do baloon - Fonte: Laboratorio 04
-        model = Matrix_Scale(0.5f,0.5f,0.5f) * Matrix_Translate(-3.0f,0.0f,0.0f);
+        model = Matrix_Translate(-3.0f,2.0f,0.0f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, BUNNY);
         DrawVirtualObject("bunny");
 
         // Desenhamos o modelo do mfour - Fonte: Laboratorio 04
-        model = Matrix_Scale(0.03f,0.03f,0.03f) * Matrix_Translate(10.0f,0.0f,0.0f);
+        model = Matrix_Scale(0.03f,0.03f,0.03f) * Matrix_Translate(10.0f,17.0f,0.0f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, MFOUR);
         DrawVirtualObject("mfour");
 
         // Desenhamos o modelo do BULLET - Fonte: Laboratorio 04
-        model = Matrix_Scale(10.0f,10.0f,10.0f) * Matrix_Translate(0.07f,0.0f,0.0f);
+        model = Matrix_Scale(10.0f,10.0f,10.0f) * Matrix_Translate(0.07f,0.03f,0.0f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, BULLET);
         DrawVirtualObject("bullet");
 
-        model = Matrix_Scale(0.5f,0.5f,0.5f) * Matrix_Translate(4.0f,0.0f,0.0f);
+        model = Matrix_Scale(0.5f,0.5f,0.5f) * Matrix_Translate(4.0f,2.0f,0.0f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, BALOON);
         DrawVirtualObject("baloon");

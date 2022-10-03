@@ -104,8 +104,13 @@ struct SceneObject
 
 struct Bullet
 {
-    glm::vec4   position;
-    glm::vec4   direction;
+    double timeInitial;
+
+    glm::vec4   origin;
+    glm::vec4   destiny;
+    glm::vec4   goal;
+
+    float   distance;
     float   object_angle;
 };
 
@@ -154,7 +159,7 @@ bool firstPersonMode = false;
 
 // ----- Atirar -----
 std::vector<Bullet> bulletsOnScene;
-float bulletSpeed = 10.0;
+float bulletSpeed = 2.0;
 
 int main(int argc, char* argv[]) {
     // Inicializamos a biblioteca GLFW. Fonte laboratório 2
@@ -385,15 +390,23 @@ int main(int argc, char* argv[]) {
         // ----- Carrega as balas dos tiros -----
 
         for (int i = 0; i < bulletsOnScene.size(); i++) {
-            bulletsOnScene[i].position += glm::vec4(bulletsOnScene[i].direction.x * resultDistance * bulletSpeed, 
-                                                    bulletsOnScene[i].direction.y * resultDistance * bulletSpeed,
-                                                    bulletsOnScene[i].direction.z * resultDistance * bulletSpeed,
-                                                    0.0f);
 
             // Desenhamos o modelo do BULLET - Fonte: Laboratorio 04
-            model = Matrix_Translate(bulletsOnScene[i].position.x, 
-                                     bulletsOnScene[i].position.y, 
-                                     bulletsOnScene[i].position.z) * Matrix_Rotate_Y(bulletsOnScene[i].object_angle) * Matrix_Scale(10.0f,10.0f,10.0f);
+            double timeInterval = (glfwGetTime() - bulletsOnScene[i].timeInitial) / bulletSpeed;
+
+            if (timeInterval > 1.0) {
+                continue;
+            }
+
+            glm::vec4 matrixA = bulletsOnScene[i].origin + (bulletsOnScene[i].goal - bulletsOnScene[i].origin)
+                                * Matrix_Scale(timeInterval, timeInterval, timeInterval);
+            glm::vec4 matrixB = bulletsOnScene[i].goal + (bulletsOnScene[i].destiny - bulletsOnScene[i].goal)
+                                * Matrix_Scale(timeInterval, timeInterval, timeInterval);
+            glm::vec4 matrixC = matrixA + (matrixB - matrixA)
+                                * Matrix_Scale(timeInterval, timeInterval, timeInterval);
+
+            model = Matrix_Translate(matrixC.x, matrixC.y, matrixC.z) * Matrix_Rotate_Y(bulletsOnScene[i].object_angle) * Matrix_Scale(10.0f,10.0f,10.0f);
+
             glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
             glUniform1i(object_id_uniform, BULLET);
             DrawVirtualObject("bullet");
@@ -1136,8 +1149,18 @@ void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
     {
         Bullet newBullet;
 
-        newBullet.direction = view_direction;
-        newBullet.position = character_pos;
+        newBullet.timeInitial = glfwGetTime();
+        newBullet.origin = character_pos;
+        newBullet.goal = character_pos + glm::vec4(view_direction.x * 20,
+                                                   view_direction.y * 20,
+                                                   view_direction.z * 20,
+                                                   0.0f);
+        newBullet.destiny = glm::vec4(newBullet.goal.x,
+                                      0.0f,
+                                      newBullet.goal.z,
+                                      1.0f);
+        newBullet.destiny += glm::vec4(view_direction.x * 10, 0.0f,view_direction.z * 10,0.0f);
+        
         newBullet.object_angle = g_CameraTheta + M_PI;
 
         bulletsOnScene.push_back(newBullet);
@@ -1204,11 +1227,11 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
     }
 
     if (key == GLFW_KEY_F && action == GLFW_PRESS) {
-        bulletSpeed = 10.0;
+        bulletSpeed = 2.0;
     }
 
     if (key == GLFW_KEY_G && action == GLFW_PRESS) {
-        bulletSpeed = 0.5;
+        bulletSpeed = 20.0;
     }
 
     // ----- Câmera e Movimento -----

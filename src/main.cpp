@@ -128,7 +128,7 @@ GLuint g_NumLoadedTextures = 0;
 
 
 // ----- Câmera e Movimentação -----
-glm::vec4 character_pos = glm::vec4(0.0f,0.0f,0.0f,0.0f);
+glm::vec4 character_pos = glm::vec4(0.0f,0.5f,0.0f,0.0f);
 glm::vec2 movement_direction = glm::vec2(0.0f,0.0f);
 glm::vec4 view_direction = glm::vec4(0.0f,0.0f,0.0f,0.0f);
 
@@ -287,7 +287,7 @@ int main(int argc, char* argv[]) {
         {
             // Abaixo definimos as varáveis que efetivamente definem a câmera virtual to tipo look at. FONTE: Laboratório 2
             camera_position_c  = glm::vec4(x,y,z,1.0f) + character_pos;
-            camera_lookat_l    = glm::vec4(character_pos.x,0.0f,character_pos.z,1.0f);
+            camera_lookat_l    = glm::vec4(character_pos.x,character_pos.y,character_pos.z,1.0f);
             camera_view_vector = camera_lookat_l - camera_position_c;
             camera_up_vector   = glm::vec4(0.0f,1.0f,0.0f,0.0f);
         } 
@@ -312,7 +312,7 @@ int main(int argc, char* argv[]) {
         float timeVariation = glfwGetTime() - lastInputTime;
         lastInputTime = glfwGetTime();
 
-        float speed = 2.4;
+        float speed = 2.0;
         float resultDistance = speed * timeVariation;
 
         movement_direction = glm::vec2(camera_view_vector.x/length_2, camera_view_vector.z/length_2);
@@ -340,9 +340,9 @@ int main(int argc, char* argv[]) {
         glm::mat4 projection;
 
         // Definimos o near, far e o field of view
-        float nearplane = -1.0f;
-        float farplane  = -40.0f;
-        float field_of_view = 3.141592 / 3.0f;
+        float nearplane = -0.5f;
+        float farplane  = -30.0f;
+        float field_of_view = 3.141592 / 2.5f;
         projection = Matrix_Perspective(field_of_view, g_ScreenRatio, nearplane, farplane);
         
         // ----- Objetos da Cena -----
@@ -363,7 +363,7 @@ int main(int argc, char* argv[]) {
         #define WALL 6
 
         // Desenhamos o modelo do mfour - Fonte: Laboratorio 04
-        model = Matrix_Translate(character_pos.x, 0.0f, character_pos.z) * Matrix_Rotate_Y(g_CameraTheta + M_PI) *  Matrix_Scale(0.03f,0.03f,0.03f);
+        model = Matrix_Translate(character_pos.x, character_pos.y, character_pos.z) * Matrix_Rotate_Y(g_CameraTheta + M_PI) *  Matrix_Scale(0.03f,0.03f,0.03f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, MFOUR);
         DrawVirtualObject("mfour");

@@ -92,6 +92,12 @@ struct SceneObject
     glm::vec3    bbox_max;
 };
 
+struct Bullet
+{
+    glm::vec4   position;
+    glm::vec4   direction;
+};
+
 // A cena virtual é uma lista de objetos nomeados, guardados em um dicionário (map). FONTE: Laboratório 2
 std::map<std::string, SceneObject> g_VirtualScene;
 
@@ -104,7 +110,7 @@ float g_ScreenRatio = 1.0f;
 // Variáveis que definem a câmera em coordenadas esféricas. FONTE: Laboratório 2
 float g_CameraTheta = 0.0f;    // Ângulo no plano ZX em relação ao eixo Z
 float g_CameraPhi = 0.0f;      // Ângulo em relação ao eixo Y
-float g_CameraDistance = 2.5f; // Distância da câmera para a origem
+float g_CameraDistance = 3.5f; // Distância da câmera para a origem
 
 // Variáveis que definem um programa de GPU (shaders). Veja função LoadShadersFromFiles(). Fonte Laboratorio 4
 GLuint vertex_shader_id;
@@ -135,6 +141,8 @@ bool d_buttonPressed = false;
 
 bool firstPersonMode = false;
 
+// ----- Atirar -----
+Bullet bulletsOnScene[10] = {};
 
 int main(int argc, char* argv[]) {
     // Inicializamos a biblioteca GLFW. Fonte laboratório 2
@@ -328,7 +336,7 @@ int main(int argc, char* argv[]) {
                                           glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
         }
 
-        // Agora computamos a matriz de Projeção. -------------------------------------------------------------------------------------
+        // ----- Agora computamos a matriz de Projeção. -----
         glm::mat4 projection;
 
         // Definimos o near, far e o field of view
@@ -337,7 +345,9 @@ int main(int argc, char* argv[]) {
         float field_of_view = 3.141592 / 3.0f;
         projection = Matrix_Perspective(field_of_view, g_ScreenRatio, nearplane, farplane);
         
-        glm::mat4 model = Matrix_Identity(); // Transformação identidade de modelagem Fonte: Laboratorio 4
+        // ----- Objetos da Cena -----
+        glm::mat4 model = Matrix_Identity(); 
+        // Transformação identidade de modelagem Fonte: Laboratorio 4
         // Enviamos as matrizes "view" e "projection" para a placa de vídeo
         // (GPU). Veja o arquivo "shader_vertex.glsl", onde estas são
         // efetivamente aplicadas em todos os pontos. FONTE: Laboratório 2
@@ -351,6 +361,12 @@ int main(int argc, char* argv[]) {
         #define MFOUR  4
         #define BULLET 5
         #define WALL 6
+
+        // Desenhamos o modelo do mfour - Fonte: Laboratorio 04
+        model = Matrix_Translate(character_pos.x, 0.0f, character_pos.z) * Matrix_Rotate_Y(g_CameraTheta + M_PI) *  Matrix_Scale(0.03f,0.03f,0.03f);
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glUniform1i(object_id_uniform, MFOUR);
+        DrawVirtualObject("mfour");
 
         // Desenhamos o modelo da esfera - Fonte: Laboratorio 04
         model = Matrix_Translate(-1.0f,2.0f,-3.0f);
@@ -375,12 +391,6 @@ int main(int argc, char* argv[]) {
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, BUNNY);
         DrawVirtualObject("bunny");
-
-        // Desenhamos o modelo do mfour - Fonte: Laboratorio 04
-        model = Matrix_Scale(0.03f,0.03f,0.03f) * Matrix_Translate(10.0f,17.0f,0.0f);
-        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-        glUniform1i(object_id_uniform, MFOUR);
-        DrawVirtualObject("mfour");
 
         // Desenhamos o modelo do BULLET - Fonte: Laboratorio 04
         model = Matrix_Scale(10.0f,10.0f,10.0f) * Matrix_Translate(0.07f,0.03f,0.0f);

@@ -420,12 +420,6 @@ int main(int argc, char* argv[]) {
             DrawVirtualObject("mfour");
         }
 
-        // Desenhamos o modelo da esfera - Fonte: Laboratorio 04
-        model = Matrix_Translate(-1.0f,2.0f,-3.0f);
-        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-        glUniform1i(object_id_uniform, SPHERE);
-        DrawVirtualObject("sphere");
-
         if (direction)
 		{
 			triOffset += triIncrement;

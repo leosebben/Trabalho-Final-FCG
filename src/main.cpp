@@ -106,6 +106,7 @@ struct Bullet
 {
     glm::vec4   position;
     glm::vec4   direction;
+    float   object_angle;
 };
 
 // A cena virtual é uma lista de objetos nomeados, guardados em um dicionário (map). FONTE: Laboratório 2
@@ -120,7 +121,7 @@ float g_ScreenRatio = 1.0f;
 // Variáveis que definem a câmera em coordenadas esféricas. FONTE: Laboratório 2
 float g_CameraTheta = 0.0f;    // Ângulo no plano ZX em relação ao eixo Z
 float g_CameraPhi = 0.0f;      // Ângulo em relação ao eixo Y
-float g_CameraDistance = 3.5f; // Distância da câmera para a origem
+float g_CameraDistance = 2.5f; // Distância da câmera para a origem
 
 // Variáveis que definem um programa de GPU (shaders). Veja função LoadShadersFromFiles(). Fonte Laboratorio 4
 GLuint vertex_shader_id;
@@ -138,7 +139,7 @@ GLuint g_NumLoadedTextures = 0;
 
 
 // ----- Câmera e Movimentação -----
-glm::vec4 character_pos = glm::vec4(0.0f,0.0f,0.0f,0.0f);
+glm::vec4 character_pos = glm::vec4(0.0f,1.0f,0.0f,0.0f);
 glm::vec2 movement_direction = glm::vec2(0.0f,0.0f);
 glm::vec4 view_direction = glm::vec4(0.0f,0.0f,0.0f,0.0f);
 
@@ -194,7 +195,7 @@ int main(int argc, char* argv[]) {
     glfwSetMouseButtonCallback(window, MouseButtonCallback);
     glfwSetCursorPosCallback(window, CursorPosCallback);
     glfwSetScrollCallback(window, ScrollCallback);
-    #ifdef TARGET_OS_X
+    #ifdef __APPLE__
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);// essa funcao quebra o mouse no linux
     #endif
 
@@ -304,16 +305,15 @@ int main(int argc, char* argv[]) {
         {
             // Abaixo definimos as varáveis que efetivamente definem a câmera virtual to tipo look at. FONTE: Laboratório 2
             camera_position_c  = glm::vec4(x,y,z,1.0f) + character_pos;
-            camera_lookat_l    = glm::vec4(character_pos.x, 0.0f,character_pos.z,1.0f);
+            camera_lookat_l    = glm::vec4(character_pos.x, character_pos.y,character_pos.z,1.0f);
             camera_view_vector = camera_lookat_l - camera_position_c;
             camera_up_vector   = glm::vec4(0.0f,1.0f,0.0f,0.0f);
         } 
-        // Câmera na primeira pessoa
-        else 
+        else // Câmera na primeira pessoa 
         {
             // Abaixo definimos as varáveis que efetivamente definem a câmera virtual do tipo free camera. FONTE: Laboratório 2
             camera_position_c  = glm::vec4(0.0f,0.0f,0.0f,1.0f) + character_pos;
-            camera_free_l      = glm::vec4(-x,-y,-z,1.0f) - character_pos;
+            camera_free_l      = glm::vec4(x,-y,z,1.0f) + character_pos;
             camera_view_vector = camera_free_l - camera_position_c;
             camera_up_vector   = glm::vec4(0.0f,1.0f,0.0f,0.0f);
         }
@@ -329,7 +329,7 @@ int main(int argc, char* argv[]) {
         float timeVariation = glfwGetTime() - lastInputTime;
         lastInputTime = glfwGetTime();
 
-        float speed = 2.0;
+        float speed = 4.0;
         float resultDistance = speed * timeVariation;
 
         movement_direction = glm::vec2(camera_view_vector.x / length_2, camera_view_vector.z / length_2);
@@ -358,7 +358,7 @@ int main(int argc, char* argv[]) {
 
         // Definimos o near, far e o field of view
         float nearplane = -0.5f;
-        float farplane  = -30.0f;
+        float farplane  = -40.0f;
         float field_of_view = 3.141592 / 3.0f;
         projection = Matrix_Perspective(field_of_view, g_ScreenRatio, nearplane, farplane);
         
@@ -382,7 +382,7 @@ int main(int argc, char* argv[]) {
         #define BALOON_BLUE 8
 
         // ----- Carrega as balas dos tiros -----
-        float bulletSpeed = 10.0;
+        float bulletSpeed = 0.5;
 
         for (int i = 0; i < bulletsOnScene.size(); i++) {
             bulletsOnScene[i].position += glm::vec4(bulletsOnScene[i].direction.x * resultDistance * bulletSpeed, 
@@ -393,7 +393,7 @@ int main(int argc, char* argv[]) {
             // Desenhamos o modelo do BULLET - Fonte: Laboratorio 04
             model = Matrix_Translate(bulletsOnScene[i].position.x, 
                                      bulletsOnScene[i].position.y, 
-                                     bulletsOnScene[i].position.z) * Matrix_Scale(10.0f,10.0f,10.0f);
+                                     bulletsOnScene[i].position.z) * Matrix_Rotate_Y(bulletsOnScene[i].object_angle) * Matrix_Scale(10.0f,10.0f,10.0f);
             glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
             glUniform1i(object_id_uniform, BULLET);
             DrawVirtualObject("bullet");
@@ -401,7 +401,7 @@ int main(int argc, char* argv[]) {
 
         if (!firstPersonMode) {
             // Desenhamos o modelo do mfour - Fonte: Laboratorio 04
-            model = Matrix_Translate(character_pos.x, 0.0f, character_pos.z) * Matrix_Rotate_Y(g_CameraTheta + M_PI) *  Matrix_Scale(0.03f,0.03f,0.03f);
+            model = Matrix_Translate(character_pos.x, character_pos.y, character_pos.z) * Matrix_Rotate_Y(g_CameraTheta + M_PI) *  Matrix_Scale(0.03f,0.03f,0.03f);
             glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
             glUniform1i(object_id_uniform, MFOUR);
             DrawVirtualObject("mfour");
@@ -455,18 +455,6 @@ int main(int argc, char* argv[]) {
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, WALL);
         DrawVirtualObject("wall");
-
-        // Desenhamos o modelo do mfour
-        model = Matrix_Scale(0.03f,0.03f,0.03f) * Matrix_Translate(10.0f,17.0f,0.0f);
-        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-        glUniform1i(object_id_uniform, MFOUR);
-        DrawVirtualObject("mfour");
-
-        // Desenhamos o modelo do BULLET
-        model = Matrix_Scale(10.0f,10.0f,10.0f) * Matrix_Translate(0.07f,0.03f,0.0f);
-        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-        glUniform1i(object_id_uniform, BULLET);
-        DrawVirtualObject("bullet");
 
         // Desenhamos o modelo do balao verde
         model = Matrix_Scale(0.5f,0.5f,0.5f) * Matrix_Translate(-7.0f,3.0f,-5.0f);
@@ -1150,6 +1138,7 @@ void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 
         newBullet.direction = view_direction;
         newBullet.position = character_pos;
+        newBullet.object_angle = g_CameraTheta + M_PI;
 
         bulletsOnScene.push_back(newBullet);
     }

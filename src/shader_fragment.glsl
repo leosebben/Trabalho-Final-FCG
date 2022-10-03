@@ -74,10 +74,19 @@ void main()
     vec4 n = normalize(normal);
 
     // Vetor que define o sentido da fonte de luz em relação ao ponto atual.
-    vec4 l = normalize(vec4(1.0f,1.0f,0.0f,0.0f));
+    vec4 l = normalize(vec4(1.0,1.0,0.5,0.0));
 
     // Vetor que define o sentido da câmera em relação ao ponto atual.
     vec4 v = normalize(camera_position - p);
+
+    // Vetor que define o sentido da reflexão especular ideal.
+    vec4 r = -l + 2 * n * dot(n,l); // PREENCHA AQUI o vetor de reflexão especular ideal
+
+    // Parâmetros que definem as propriedades espectrais da superfície
+    vec3 Kd; // Refletância difusa
+    vec3 Ks; // Refletância especular
+    vec3 Ka; // Refletância ambiente
+    float q; // Expoente especular para o modelo de iluminação de Phong
 
     // Coordenadas de textura U e V
     float U = 0.0;
@@ -96,36 +105,34 @@ void main()
         float phi = asin(vy / rho);
         U = (theta + M_PI) / (2 * M_PI);
         V = (phi + M_PI_2) / M_PI;
+
+        Kd = vec3(0.8,0.4,0.08);
+        Ks = vec3(0.0,0.0,0.0);
+        Ka = vec3(0.4,0.2,0.04);
+        q = 1.0;
     }
-    // else if ( object_id == BUNNY )
-    // {
-    //     // PREENCHA AQUI as coordenadas de textura do coelho, computadas com
-    //     // projeção planar XY em COORDENADAS DO MODELO. Utilize como referência
-    //     // o slides 99-104 do documento Aula_20_Mapeamento_de_Texturas.pdf,
-    //     // e também use as variáveis min*/max* definidas abaixo para normalizar
-    //     // as coordenadas de textura U e V dentro do intervalo [0,1]. Para
-    //     // tanto, veja por exemplo o mapeamento da variável 'p_v' utilizando
-    //     // 'h' no slides 158-160 do documento Aula_20_Mapeamento_de_Texturas.pdf.
-    //     // Veja também a Questão 4 do Questionário 4 no Moodle.
+    else if ( object_id == BUNNY )
+    {
+        // projeção planar
 
-    //     // float minx = bbox_min.x;
-    //     // float maxx = bbox_max.x;
+        float minx = bbox_min.x;
+        float maxx = bbox_max.x;
 
-    //     // float miny = bbox_min.y;
-    //     // float maxy = bbox_max.y;
+        float miny = bbox_min.y;
+        float maxy = bbox_max.y;
 
-    //     // float minz = bbox_min.z;
-    //     // float maxz = bbox_max.z;
+        float minz = bbox_min.z;
+        float maxz = bbox_max.z;
 
-    //     // // novo codigo a seguir
+        U = (position_model.x - minx) / (maxx - minx);
+        V = (position_model.y - miny) / (maxy - miny);
 
-    //     // U = (position_model.x - minx) / (maxx - minx);
-    //     // V = (position_model.y - miny) / (maxy - miny);
+        Kd = vec3(0.08,0.4,0.8);
+        Ks = vec3(0.8,0.8,0.8);
+        Ka = vec3(0.04,0.2,0.4);
+        q = 32.0;
 
-    //     U = texcoords.x;
-    //     V = texcoords.y;
-
-    // }    
+    }    
     if ( object_id == BULLET ||  object_id == BALOON_RED  ||  object_id == PLANE ||  object_id == WALL || object_id ==  MFOUR ||  object_id == BUNNY ||  object_id == BALOON_YELLOW   ||  object_id == BALOON_BLUE  )
     {
         // Coordenadas de textura do plano, obtidas do arquivo OBJ.
@@ -142,55 +149,65 @@ void main()
     vec3 Kd_BALOON_RED = texture(BALOON_TEXTURE_RED, vec2(U,V)).rgb;
     vec3 Kd_BALOON_YELLOW = texture(BALOON_TEXTURE_YELLOW, vec2(U,V)).rgb;
     vec3 Kd_BALOON_BLUE= texture(BALOON_TEXTURE_BLUE, vec2(U,V)).rgb;
-    vec3 Kd_SPHERE = texture(SPHERE_TEXTURE, vec2(U,V)).rgb;
 
-    // Equação de Iluminação
+
+    // MODELO DE ILUMINAÇÃO DE PHONG:
+
+    // Espectro da fonte de iluminação
+    vec3 I = vec3(1.0,1.0,1.0);
+    // Espectro da luz ambiente
+    vec3 Ia = vec3(0.2,0.2,0.2);
+    // Termo difuso utilizando a lei dos cossenos de Lambert
     float lambert = max(0,dot(n,l));
+    // Termo ambiente
+    vec3 ambient_term = Ka * Ia;
+    // Termo especular utilizando o modelo de iluminação de Phong
+    float phong_specular_term  = pow(max(0,dot(r,v)),q); // PREENCH AQUI o termo especular de Phong
+   
 
     switch (object_id)
     {
         case MFOUR:
-        color = Kd_MFOUR1 * (pow(lambert, 1.0) + 1.0);
+        color = Kd_MFOUR1;
         break;
 
         case BULLET:
-        color = Kd_BULLET1 * (pow(lambert, 1.0) + 1.0);
+        color = Kd_BULLET1;
         break;
 
         case PLANE:	
-        color = Kd_WALL2 * (pow(lambert, 1.0) + 1.0);
+        color = Kd_WALL2 ;
         break;
 
         case BALOON_RED:
-        color = Kd_BALOON_RED * (pow(lambert, 1.0) + 1.0);
+        color = Kd_BALOON_RED * (pow(lambert, 1) + 0.01) + Kd_BLACK1 * (1 - (pow(lambert, 0.2)) + 0.01); 
         break;
 
         case BALOON_YELLOW:
-        color = Kd_BALOON_YELLOW * (pow(lambert, 1.0) + 1.0);
+        color = Kd_BALOON_YELLOW * (pow(lambert, 1) + 0.01) + Kd_BLACK1 * (1 - (pow(lambert, 0.2)) + 0.01); 
         break;
 
         case BALOON_BLUE:
-        color = Kd_BALOON_BLUE * (pow(lambert, 1.0) + 1.0);
+        color = Kd_BALOON_BLUE * (pow(lambert, 1) + 0.01) + Kd_BLACK1 * (1 - (pow(lambert, 0.2)) + 0.01); 
         break;
 
         case BUNNY:
-        color = Kd_BALOON_RED * (pow(lambert, 1.0) + 1.0);
+        color = Kd * I * lambert + ambient_term + Ks * I * phong_specular_term;
         break;
 
         case WALL:
-        color = Kd_WALL1 * (pow(lambert, 1.0) + 1.0);
+        color = Kd_WALL1;
         break;
 
         case SPHERE:
-        color = Kd_BLACK1 * (pow(lambert, 1.0) + 1.0);
+        color = Kd * I * lambert + ambient_term + Ks * I * phong_specular_term;
         break;
 
         default:
-        color = Kd_BLACK1 * (pow(lambert, 1.0) + 1.0);
+        color = Kd_BLACK1;
     }
 
     // Cor final com correção gamma, considerando monitor sRGB.
     // Veja https://en.wikipedia.org/w/index.php?title=Gamma_correction&oldid=751281772#Windows.2C_Mac.2C_sRGB_and_TV.2Fvideo_standard_gammas
     color = pow(color, vec3(1.0,1.0,1.0)/2.2);
 } 
-

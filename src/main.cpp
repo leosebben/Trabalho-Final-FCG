@@ -39,7 +39,6 @@ struct ObjModel
     std::vector<tinyobj::material_t>  materials;
 
     // Este construtor lê o modelo de um arquivo utilizando a biblioteca tinyobjloader.
-    // Veja: https://github.com/syoyo/tinyobjloader
     ObjModel(const char* filename, const char* basepath = NULL, bool triangulate = true)
     {
         printf("Carregando modelo \"%s\"... ", filename);
@@ -56,25 +55,24 @@ struct ObjModel
         printf("OK.\n");
     }
 };
+
 // Declaração de funções utilizadas para pilha de matrizes de modelagem. Fonte: Laboratorio 04
 void PushMatrix(glm::mat4 M);
 void PopMatrix(glm::mat4& M);
 
-// Declaração de várias funções utilizadas em main().  Essas estão definidas
-// logo após a definição de main() neste arquivo. FONTE: Laboratório 2
-void BuildTrianglesAndAddToVirtualScene(ObjModel*); // Constrói representação de um ObjModel como malha de triângulos para renderização
-void ComputeNormals(ObjModel* model); // Computa normais de um ObjModel, caso não existam.
-void LoadShadersFromFiles(); // Carrega os shaders de vértice e fragmento, criando um programa de GPU
-void LoadTextureImage(const char* filename); // Função que carrega imagens de textura - Fonte: Laboratorio 5
-void DrawVirtualObject(const char* object_name); // Desenha um objeto armazenado em g_VirtualScene
-GLuint LoadShader_Vertex(const char* filename);   // Carrega um vertex shader
-GLuint LoadShader_Fragment(const char* filename); // Carrega um fragment shader
-void LoadShader(const char* filename, GLuint shader_id); // Função utilizada pelas duas acima
-GLuint CreateGpuProgram(GLuint vertex_shader_id, GLuint fragment_shader_id); // Cria um programa de GPU
-void PrintObjModelInfo(ObjModel*); // Função para debugging. Fonte: Laboratorio 04
+// Declaração de várias funções utilizadas em main(). FONTE: Laboratório 2
+void BuildTrianglesAndAddToVirtualScene(ObjModel*);                             // Constrói representação de um ObjModel como malha de triângulos para renderização
+void ComputeNormals(ObjModel* model);                                           // Computa normais de um ObjModel, caso não existam.
+void LoadShadersFromFiles();                                                    // Carrega os shaders de vértice e fragmento, criando um programa de GPU
+void LoadTextureImage(const char* filename);                                    // Função que carrega imagens de textura - Fonte: Laboratorio 5
+void DrawVirtualObject(const char* object_name);                                // Desenha um objeto armazenado em g_VirtualScene
+GLuint LoadShader_Vertex(const char* filename);                                 // Carrega um vertex shader
+GLuint LoadShader_Fragment(const char* filename);                               // Carrega um fragment shader
+void LoadShader(const char* filename, GLuint shader_id);                        // Função utilizada pelas duas acima
+GLuint CreateGpuProgram(GLuint vertex_shader_id, GLuint fragment_shader_id);    // Cria um programa de GPU
+void PrintObjModelInfo(ObjModel*);                                              // Função para debugging. Fonte: Laboratorio 04
 
-// Funções callback para comunicação com o sistema operacional e interação do
-// usuário. Veja mais comentários nas definições das mesmas, abaixo. FONTE: Laboratório 2
+// Funções callback para comunicação com o sistema operacional e interação do usuário. FONTE: Laboratório 2
 void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
 void ErrorCallback(int error, const char* description);
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
@@ -82,23 +80,19 @@ void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 void CursorPosCallback(GLFWwindow* window, double xpos, double ypos);
 void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 
-// Definimos uma estrutura que armazenará dados necessários para renderizar
-// cada objeto da cena virtual. FONTE: Laboratório 4
+// Definimos uma estrutura que armazenará dados necessários para renderizar cada objeto da cena virtual. FONTE: Laboratório 4
 struct SceneObject
 {
-    std::string  name;              // Nome do objeto
-    size_t       first_index;       // Índice do primeiro vértice dentro do vetor indices[] definido em BuildTriangles()
-    size_t       num_indices;       // Número de índices do objeto dentro do vetor indices[] definido em BuildTriangles()
-    GLenum       rendering_mode;    // Modo de rasterização (GL_TRIANGLES, GL_TRIANGLE_STRIP, etc.)
-    GLuint       vertex_array_object_id; // ID do VAO onde estão armazenados os atributos do modelo. Fonte laboratorio 4
-    glm::vec3    bbox_min; // Axis-Aligned Bounding Box do objeto Fonte: laboratorio 5
+    std::string  name;                  // Nome do objeto
+    size_t       first_index;           // Índice do primeiro vértice dentro do vetor indices[] definido em BuildTriangles()
+    size_t       num_indices;           // Número de índices do objeto dentro do vetor indices[] definido em BuildTriangles()
+    GLenum       rendering_mode;        // Modo de rasterização (GL_TRIANGLES, GL_TRIANGLE_STRIP, etc.)
+    GLuint       vertex_array_object_id;// ID do VAO onde estão armazenados os atributos do modelo. Fonte laboratorio 4
+    glm::vec3    bbox_min;              // Axis-Aligned Bounding Box do objeto Fonte: laboratorio 5
     glm::vec3    bbox_max;
 };
 
-// A cena virtual é uma lista de objetos nomeados, guardados em um dicionário
-// (map).  Veja dentro da função BuildTriangles() como que são incluídos
-// objetos dentro da variável g_VirtualScene, e veja na função main() como
-// estes são acessados. FONTE: Laboratório 2
+// A cena virtual é uma lista de objetos nomeados, guardados em um dicionário (map). FONTE: Laboratório 2
 std::map<std::string, SceneObject> g_VirtualScene;
 
 // Pilha que guardará as matrizes de modelagem. Fonte: laboratorio 4
@@ -107,21 +101,11 @@ std::stack<glm::mat4>  g_MatrixStack;
 // Razão de proporção da janela (largura/altura). Veja função FramebufferSizeCallback(). FONTE: Laboratório 2
 float g_ScreenRatio = 1.0f;
 
-// "g_LeftMouseButtonPressed = true" se o usuário está com o botão esquerdo do mouse
-// pressionado no momento atual. Veja função MouseButtonCallback(). FONTE: Laboratório 2
-bool g_LeftMouseButtonPressed = false;
-
-// Variáveis que definem a câmera em coordenadas esféricas, controladas pelo
-// usuário através do mouse (veja função CursorPosCallback()). A posição
-// efetiva da câmera é calculada dentro da função main(), dentro do loop de
-// renderização. FONTE: Laboratório 2
-float g_CameraTheta = 0.0f;     // Ângulo no plano ZX em relação ao eixo Z
-float g_CameraPhi = 0.0f;       // Ângulo em relação ao eixo Y
+// Variáveis que definem a câmera em coordenadas esféricas. FONTE: Laboratório 2
+float g_CameraTheta = 0.0f;    // Ângulo no plano ZX em relação ao eixo Z
+float g_CameraPhi = 0.0f;      // Ângulo em relação ao eixo Y
 float g_CameraDistance = 2.5f; // Distância da câmera para a origem
 
-// Posição do personagem
-glm::vec4 cubo_pos = glm::vec4(0.0f,0.0f,0.0f,0.0f);
-glm::vec2 camera_movement_direction = glm::vec2(0.0f,0.0f);
 // Variáveis que definem um programa de GPU (shaders). Veja função LoadShadersFromFiles(). Fonte Laboratorio 4
 GLuint vertex_shader_id;
 GLuint fragment_shader_id;
@@ -136,12 +120,24 @@ GLint bbox_max_uniform;
 // Número de texturas carregadas pela função LoadTextureImage() Fonte: laboratorio 5
 GLuint g_NumLoadedTextures = 0;
 
+
+// ----- Câmera e Movimentação -----
+glm::vec4 character_pos = glm::vec4(0.0f,0.0f,0.0f,0.0f);
+glm::vec2 movement_direction = glm::vec2(0.0f,0.0f);
+glm::vec4 view_direction = glm::vec4(0.0f,0.0f,0.0f,0.0f);
+
 double lastInputTime = 0.0;
+
+bool w_buttonPressed = false;
+bool a_buttonPressed = false;
+bool s_buttonPressed = false;
+bool d_buttonPressed = false;
 
 bool firstPersonMode = false;
 
+
 int main(int argc, char* argv[]) {
-    // Inicializamos a biblioteca GLFW
+    // Inicializamos a biblioteca GLFW. Fonte laboratório 2
     int success = glfwInit();
     if (!success)
     {
@@ -149,10 +145,10 @@ int main(int argc, char* argv[]) {
         std::exit(EXIT_FAILURE);
     }
 
-    // Callback para mostrar bugs
+    // Callback para mostrar bugs. Fonte laboratório 2
     glfwSetErrorCallback(ErrorCallback);
 
-    // Versão do OPENGL
+    // Versão do OPENGL. Fonte laboratório 2
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
@@ -160,10 +156,10 @@ int main(int argc, char* argv[]) {
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     #endif
 
-    // Utilizar só o core, funções modernas
+    // Utilizar só o core, funções modernas. Fonte laboratório 2
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    // Criarmos a janela do sistema operacional
+    // Criarmos a janela do sistema operacional. Fonte laboratório 2
     GLFWwindow* window;
     window = glfwCreateWindow(800, 800, "INF01047 - Trabalho Final", NULL, NULL);
     if (!window)
@@ -173,23 +169,23 @@ int main(int argc, char* argv[]) {
         std::exit(EXIT_FAILURE);
     }
 
-    // Função callback sempre que o usuário precionar uma tecla
+    // Função callback sempre que o usuário precionar uma tecla. Fonte laboratório 2
     glfwSetKeyCallback(window, KeyCallback);
 
-    // Funções de callback referentes ao mouse
+    // Funções de callback referentes ao mouse. Fonte laboratório 2
     glfwSetMouseButtonCallback(window, MouseButtonCallback);
     glfwSetCursorPosCallback(window, CursorPosCallback);
     glfwSetScrollCallback(window, ScrollCallback);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-    // Função para redimensionar a tela
+    // Função para redimensionar a tela. Fonte laboratório 2
     glfwSetFramebufferSizeCallback(window, FramebufferSizeCallback);
     glfwSetWindowSize(window, 800, 800); 
 
-    // Indicamos que as chamadas OpenGL deverão renderizar nesta janela
+    // Indicamos que as chamadas OpenGL deverão renderizar nesta janela. Fonte laboratório 2
     glfwMakeContextCurrent(window);
 
-    // Carregamento de todas funções definidas por OpenGL 3.3
+    // Carregamento de todas funções definidas por OpenGL 3.3 
     gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
 
     // Imprimimos no terminal informações sobre a GPU do sistema FONTE: Laboratório 2
@@ -265,45 +261,72 @@ int main(int argc, char* argv[]) {
         // Pedimos para a GPU utilizar o programa de GPU criado acima 
         glUseProgram(program_id);
 
-        // Computamos a posição da câmera utilizando coordenadas esféricas.  As
-        // variáveis g_CameraDistance, g_CameraPhi, e g_CameraTheta são
-        // controladas pelo mouse do usuário. Veja as funções CursorPosCallback()
-        // e ScrollCallback(). FONTE: Laboratório 2
+        // Computamos a posição da câmera utilizando coordenadas esféricas. FONTE: Laboratório 2
         float r = g_CameraDistance;
         float y = r*sin(g_CameraPhi);
         float z = r*cos(g_CameraPhi)*cos(g_CameraTheta);
         float x = r*cos(g_CameraPhi)*sin(g_CameraTheta);
 
-        // camera variable
+        // Variáveis da Câmera
         glm::vec4 camera_position_c;
         glm::vec4 camera_lookat_l;
         glm::vec4 camera_free_l;
         glm::vec4 camera_view_vector;
         glm::vec4 camera_up_vector;
 
+        // Câmera na terceira pessoa
         if (!firstPersonMode)
         {
             // Abaixo definimos as varáveis que efetivamente definem a câmera virtual to tipo look at. FONTE: Laboratório 2
-            camera_position_c  = glm::vec4(x,y,z,1.0f) + cubo_pos;
-            camera_lookat_l    = glm::vec4(cubo_pos.x,0.0f,cubo_pos.z,1.0f);
+            camera_position_c  = glm::vec4(x,y,z,1.0f) + character_pos;
+            camera_lookat_l    = glm::vec4(character_pos.x,0.0f,character_pos.z,1.0f);
             camera_view_vector = camera_lookat_l - camera_position_c;
             camera_up_vector   = glm::vec4(0.0f,1.0f,0.0f,0.0f);
         } 
+        // Câmera na primeira pessoa
         else 
         {
             // Abaixo definimos as varáveis que efetivamente definem a câmera virtual do tipo free camera. FONTE: Laboratório 2
-            camera_position_c  = glm::vec4(0.0f,0.0f,0.0f,1.0f) + cubo_pos;
-            camera_free_l      = glm::vec4(-x,-y,-z,1.0f) - cubo_pos;
+            camera_position_c  = glm::vec4(0.0f,0.0f,0.0f,1.0f) + character_pos;
+            camera_free_l      = glm::vec4(-x,-y,-z,1.0f) - character_pos;
             camera_view_vector = camera_free_l - camera_position_c;
             camera_up_vector   = glm::vec4(0.0f,1.0f,0.0f,0.0f);
         }
 
-        // Salvamos a direção da câmera em um vetor com as coordenadas de x e z
-        float camera_view_length = sqrt(pow(camera_view_vector.x, 2) + pow(camera_view_vector.z, 2));
-        camera_movement_direction = glm::vec2(camera_view_vector.x/camera_view_length, camera_view_vector.z/camera_view_length);
-
         // Computamos a matriz "View" utilizando os parâmetros da câmera
         glm::mat4 view = Matrix_Camera_View(camera_position_c, camera_view_vector, camera_up_vector);
+
+
+        // ----- Calcula direção do Movimento e da Câmera -----
+        float length_2 = sqrt(pow(camera_view_vector.x, 2) + pow(camera_view_vector.z, 2));
+        float length_3 = sqrt(pow(camera_view_vector.x, 2) + pow(camera_view_vector.y, 2) + pow(camera_view_vector.z, 2));
+
+        float timeVariation = glfwGetTime() - lastInputTime;
+        lastInputTime = glfwGetTime();
+
+        float speed = 2.0;
+        float resultDistance = speed * timeVariation;
+
+        movement_direction = glm::vec2(camera_view_vector.x/length_2, camera_view_vector.z/length_2);
+        view_direction = glm::vec4(camera_view_vector.x / length_3,
+                                          camera_view_vector.y / length_3,
+                                          camera_view_vector.z / length_3,
+                                          0.0f);
+
+        if (w_buttonPressed) {
+            character_pos += glm::vec4(resultDistance * movement_direction.x, 0.0f, resultDistance * movement_direction.y, 0.0f);
+        }
+        if (a_buttonPressed) {
+            character_pos -= crossproduct(glm::vec4(resultDistance * movement_direction.x, 0.0f, resultDistance * movement_direction.y, 0.0f),
+                                          glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+        }
+        if (s_buttonPressed) {
+            character_pos -= glm::vec4(resultDistance * movement_direction.x, 0.0f, resultDistance * movement_direction.y, 0.0f);
+        }
+        if (d_buttonPressed) {
+            character_pos += crossproduct(glm::vec4(resultDistance * movement_direction.x, 0.0f, resultDistance * movement_direction.y, 0.0f),
+                                          glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+        }
 
         // Agora computamos a matriz de Projeção. -------------------------------------------------------------------------------------
         glm::mat4 projection;
@@ -936,36 +959,13 @@ double g_LastCursorPosX, g_LastCursorPosY;
 // Função callback chamada sempre que o usuário aperta algum dos botões do mouse FONTE: Laboratório 2
 void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 {
-    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
-    {
-        // Se o usuário pressionou o botão esquerdo do mouse, guardamos a
-        // posição atual do cursor nas variáveis g_LastCursorPosX e
-        // g_LastCursorPosY.  Também, setamos a variável
-        // g_LeftMouseButtonPressed como true, para saber que o usuário está
-        // com o botão esquerdo pressionado.
-        glfwGetCursorPos(window, &g_LastCursorPosX, &g_LastCursorPosY);
-        g_LeftMouseButtonPressed = true;
-    }
-    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
-    {
-        // Quando o usuário soltar o botão esquerdo do mouse, atualizamos a
-        // variável abaixo para false.
-        g_LeftMouseButtonPressed = false;
-    }
+    
 }
 
 // Função callback chamada sempre que o usuário movimentar o cursor do mouse em
 // cima da janela OpenGL. FONTE: Laboratório 2
 void CursorPosCallback(GLFWwindow* window, double xpos, double ypos)
 {
-    // Abaixo executamos o seguinte: caso o botão esquerdo do mouse esteja
-    // pressionado, computamos quanto que o mouse se movimento desde o último
-    // instante de tempo, e usamos esta movimentação para atualizar os
-    // parâmetros que definem a posição da câmera dentro da cena virtual.
-    // Assim, temos que o usuário consegue controlar a câmera.
-
-    //if (!g_LeftMouseButtonPressed)
-    //    return;
 
     // Deslocamento do cursor do mouse em x e y de coordenadas de tela!
     float dx = xpos - g_LastCursorPosX;
@@ -1021,32 +1021,23 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
         firstPersonMode = !firstPersonMode;
     }
 
-    // Torna movimento baseado no tempo
-    if (lastInputTime + 0.01 < glfwGetTime()) {
-        // Se o usuário pressionar a tecla W, movimenta-se para frente
-        if (key == GLFW_KEY_W && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
-            cubo_pos += glm::vec4(camera_movement_direction.x, 0.0f, camera_movement_direction.y,0.0f);
-        }
+    // ----- Câmera e Movimento -----
 
-        // Se o usuário pressionar a tecla A, movimenta-se para frente
-        if (key == GLFW_KEY_A && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
-            glm::vec4 result = crossproduct(glm::vec4(camera_movement_direction.x, 0.0f, camera_movement_direction.y,0.0f),
-                                            glm::vec4(0.0f, 1.0f, 0.0f, 0.0f));
-            cubo_pos -= result;
-        }
+    // Se o usuário pressionar a tecla W, movimenta-se para frente
+    if (key == GLFW_KEY_W && action == GLFW_PRESS)  w_buttonPressed = true;
+    if (key == GLFW_KEY_W && action == GLFW_RELEASE) w_buttonPressed = false;
 
-        // Se o usuário pressionar a tecla S, movimenta-se para frente
-        if (key == GLFW_KEY_S && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
-            cubo_pos -= glm::vec4(camera_movement_direction.x, 0.0f, camera_movement_direction.y,0.0f);
-        }
+    // Se o usuário pressionar a tecla A, movimenta-se para frente
+    if (key == GLFW_KEY_A && action == GLFW_PRESS)  a_buttonPressed = true;
+    if (key == GLFW_KEY_A && action == GLFW_RELEASE) a_buttonPressed = false;
 
-        // Se o usuário pressionar a tecla D, movimenta-se para frente
-        if (key == GLFW_KEY_D && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
-            glm::vec4 result = crossproduct(glm::vec4(camera_movement_direction.x, 0.0f, camera_movement_direction.y,0.0f),
-                                            glm::vec4(0.0f, 1.0f, 0.0f, 0.0f));
-            cubo_pos += result;
-        }
-    }
+    // Se o usuário pressionar a tecla S, movimenta-se para frente
+    if (key == GLFW_KEY_S && action == GLFW_PRESS)  s_buttonPressed = true;
+    if (key == GLFW_KEY_S && action == GLFW_RELEASE) s_buttonPressed = false;
+
+    // Se o usuário pressionar a tecla D, movimenta-se para frente
+    if (key == GLFW_KEY_D && action == GLFW_PRESS)  d_buttonPressed = true;
+    if (key == GLFW_KEY_D && action == GLFW_RELEASE) d_buttonPressed = false;
 
     lastInputTime = glfwGetTime();
 }

@@ -157,13 +157,13 @@ bool a_buttonPressed = false;
 bool s_buttonPressed = false;
 bool d_buttonPressed = false;
 
-bool firstPersonMode = false;
+bool firstPersonMode = true;
 
 // ----- Atirar -----
 std::vector<Bullet> bulletsOnScene;
 
 float bulletSpeed = 2.0;
-bool canShoot = false;
+bool canShoot = true;
 
 int main(int argc, char* argv[]) {
     // Inicializamos a biblioteca GLFW. Fonte laboratório 2

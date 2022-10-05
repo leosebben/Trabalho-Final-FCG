@@ -145,7 +145,7 @@ GLuint g_NumLoadedTextures = 0;
 
 
 // ----- Câmera e Movimentação -----
-glm::vec4 character_pos = glm::vec4(0.0f,1.0f,0.0f,0.0f);
+glm::vec4 character_translation = glm::vec4(0.0f,1.0f,0.0f,0.0f);
 glm::vec4 movement_direction = glm::vec4(0.0f,0.0f,0.0f,0.0f);
 glm::vec4 view_direction = glm::vec4(0.0f,0.0f,0.0f,0.0f);
 
@@ -318,8 +318,8 @@ int main(int argc, char* argv[]) {
             canShoot = false;
 
             // Abaixo definimos as varáveis que efetivamente definem a câmera virtual to tipo look at. FONTE: Laboratório 2
-            camera_position_c  = glm::vec4(x,y,z,1.0f) + character_pos;
-            camera_lookat_l    = glm::vec4(character_pos.x, character_pos.y,character_pos.z,1.0f);
+            camera_position_c  = glm::vec4(-x,y,-z,1.0f) + character_translation;
+            camera_lookat_l    = glm::vec4(character_translation.x, character_translation.y,character_translation.z,1.0f);
             camera_view_vector = camera_lookat_l - camera_position_c;
             camera_up_vector   = glm::vec4(0.0f,1.0f,0.0f,0.0f);
         } 
@@ -329,8 +329,8 @@ int main(int argc, char* argv[]) {
             canShoot = true;
 
             // Abaixo definimos as varáveis que efetivamente definem a câmera virtual do tipo free camera. FONTE: Laboratório 2
-            camera_position_c  = glm::vec4(0.0f,0.0f,0.0f,1.0f) + character_pos;
-            camera_free_l      = glm::vec4(x,-y,z,1.0f) + character_pos;
+            camera_position_c  = glm::vec4(0.0f,0.0f,0.0f,1.0f) + character_translation;
+            camera_free_l      = glm::vec4(x,-y,z,1.0f) + character_translation;
             camera_view_vector = camera_free_l - camera_position_c;
             camera_up_vector   = glm::vec4(0.0f,1.0f,0.0f,0.0f);
         }
@@ -356,16 +356,16 @@ int main(int argc, char* argv[]) {
                                    0.0f);
 
         if (w_buttonPressed) {
-            character_pos += resultDistance * movement_direction;
+            character_translation += resultDistance * movement_direction;
         }
         if (a_buttonPressed) {
-            character_pos -= crossproduct(resultDistance * movement_direction, glm::vec4(0.0f,1.0f,0.0f,0.0f));
+            character_translation -= crossproduct(resultDistance * movement_direction, glm::vec4(0.0f,1.0f,0.0f,0.0f));
         }
         if (s_buttonPressed) {
-            character_pos -= resultDistance * movement_direction;
+            character_translation -= resultDistance * movement_direction;
         }
         if (d_buttonPressed) {
-            character_pos += crossproduct(resultDistance * movement_direction, glm::vec4(0.0f,1.0f,0.0f,0.0f));
+            character_translation += crossproduct(resultDistance * movement_direction, glm::vec4(0.0f,1.0f,0.0f,0.0f));
         }
 
         // ----- Agora computamos a matriz de Projeção. -----
@@ -435,9 +435,9 @@ int main(int argc, char* argv[]) {
         if (!firstPersonMode) {
             // Desenhamos o modelo do mfour - Fonte: Laboratorio 04
             if (!rotate_character) {
-                model = Matrix_Translate(character_pos.x, character_pos.y, character_pos.z) *  Matrix_Scale(0.03f,0.03f,0.03f);
+                model = Matrix_Translate(character_translation.x, character_translation.y, character_translation.z) *  Matrix_Scale(0.03f,0.03f,0.03f);
             } else {
-                model = Matrix_Translate(character_pos.x, character_pos.y, character_pos.z) * Matrix_Rotate_Y(g_CameraTheta + M_PI) *  Matrix_Scale(0.03f,0.03f,0.03f);
+                model = Matrix_Translate(character_translation.x, character_translation.y, character_translation.z) * Matrix_Rotate_Y(g_CameraTheta) *  Matrix_Scale(0.03f,0.03f,0.03f);
             }
             glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
             glUniform1i(object_id_uniform, MFOUR);
@@ -1172,7 +1172,7 @@ void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
         newBullet.finish = false;
         newBullet.timeInitial = glfwGetTime();
 
-        newBullet.origin = character_pos;
+        newBullet.origin = character_translation;
         newBullet.aux_1 = newBullet.origin + (distance * view_direction);
         newBullet.aux_2 = newBullet.aux_1 + (distance * movement_direction);
         newBullet.destiny = glm::vec4(newBullet.aux_2.x, 0.0f, newBullet.aux_2.z, 0.0f) + (distance * movement_direction);

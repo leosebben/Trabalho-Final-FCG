@@ -104,14 +104,13 @@ struct SceneObject
 
 struct Bullet
 {
+    bool finish;
     double timeInitial;
 
     glm::vec4   origin;
+    glm::vec4   aux_1;
+    glm::vec4   aux_2;
     glm::vec4   destiny;
-    glm::vec4   goal;
-
-    float   distance;
-    float   object_angle;
 };
 
 // A cena virtual é uma lista de objetos nomeados, guardados em um dicionário (map). FONTE: Laboratório 2
@@ -145,7 +144,7 @@ GLuint g_NumLoadedTextures = 0;
 
 // ----- Câmera e Movimentação -----
 glm::vec4 character_pos = glm::vec4(0.0f,1.0f,0.0f,0.0f);
-glm::vec2 movement_direction = glm::vec2(0.0f,0.0f);
+glm::vec4 movement_direction = glm::vec4(0.0f,0.0f,0.0f,0.0f);
 glm::vec4 view_direction = glm::vec4(0.0f,0.0f,0.0f,0.0f);
 
 double lastInputTime = 0.0;
@@ -348,25 +347,23 @@ int main(int argc, char* argv[]) {
         float speed = 4.0;
         float resultDistance = speed * timeVariation;
 
-        movement_direction = glm::vec2(camera_view_vector.x / length_2, camera_view_vector.z / length_2);
+        movement_direction = glm::vec4(camera_view_vector.x / length_2, 0.0f, camera_view_vector.z / length_2, 0.0f);
         view_direction = glm::vec4(camera_view_vector.x / length_3,
                                    camera_view_vector.y / length_3,
                                    camera_view_vector.z / length_3,
                                    0.0f);
 
         if (w_buttonPressed) {
-            character_pos += glm::vec4(resultDistance * movement_direction.x, 0.0f, resultDistance * movement_direction.y, 0.0f);
+            character_pos += resultDistance * movement_direction;
         }
         if (a_buttonPressed) {
-            character_pos -= crossproduct(glm::vec4(resultDistance * movement_direction.x, 0.0f, resultDistance * movement_direction.y, 0.0f),
-                                          glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+            character_pos -= crossproduct(resultDistance * movement_direction, glm::vec4(0.0f,1.0f,0.0f,0.0f));
         }
         if (s_buttonPressed) {
-            character_pos -= glm::vec4(resultDistance * movement_direction.x, 0.0f, resultDistance * movement_direction.y, 0.0f);
+            character_pos -= resultDistance * movement_direction;
         }
         if (d_buttonPressed) {
-            character_pos += crossproduct(glm::vec4(resultDistance * movement_direction.x, 0.0f, resultDistance * movement_direction.y, 0.0f),
-                                          glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+            character_pos += crossproduct(resultDistance * movement_direction, glm::vec4(0.0f,1.0f,0.0f,0.0f));
         }
 
         // ----- Agora computamos a matriz de Projeção. -----
@@ -402,20 +399,21 @@ int main(int argc, char* argv[]) {
         for (int i = 0; i < bulletsOnScene.size(); i++) {
 
             // Desenhamos o modelo do BULLET - Fonte: Laboratorio 04
-            double timeInterval = (glfwGetTime() - bulletsOnScene[i].timeInitial) / bulletSpeed;
+            float timeInterval = (glfwGetTime() - bulletsOnScene[i].timeInitial) / bulletSpeed;
 
-            if (timeInterval > 1.0) {
+            if (timeInterval > 1.0 || bulletsOnScene[i].finish) {
+                bulletsOnScene[i].finish = true;
                 continue;
             }
 
-            glm::vec4 matrixA = bulletsOnScene[i].origin + (bulletsOnScene[i].goal - bulletsOnScene[i].origin)
-                                * Matrix_Scale(timeInterval, timeInterval, timeInterval);
-            glm::vec4 matrixB = bulletsOnScene[i].goal + (bulletsOnScene[i].destiny - bulletsOnScene[i].goal)
-                                * Matrix_Scale(timeInterval, timeInterval, timeInterval);
-            glm::vec4 matrixC = matrixA + (matrixB - matrixA)
-                                * Matrix_Scale(timeInterval, timeInterval, timeInterval);
+            glm::vec4 line_1 = bulletsOnScene[i].origin + timeInterval * (bulletsOnScene[i].aux_1 - bulletsOnScene[i].origin);
+            glm::vec4 line_2 = bulletsOnScene[i].aux_1 + timeInterval * (bulletsOnScene[i].aux_2 - bulletsOnScene[i].aux_1);
+            glm::vec4 line_3 = bulletsOnScene[i].aux_2 + timeInterval * (bulletsOnScene[i].destiny - bulletsOnScene[i].aux_2);
+            glm::vec4 sub_line_1 = line_1 + timeInterval * (line_2 - line_1);
+            glm::vec4 sub_line_2 = line_2 + timeInterval * (line_3 - line_2);
+            glm::vec4 result_point = sub_line_1 + timeInterval * (sub_line_2 - sub_line_1);
 
-            model = Matrix_Translate(matrixC.x, matrixC.y, matrixC.z) * Matrix_Rotate_Y(bulletsOnScene[i].object_angle) * Matrix_Scale(10.0f,10.0f,10.0f);
+            model = Matrix_Translate(result_point.x, result_point.y, result_point.z) * Matrix_Scale(10.0f,10.0f,10.0f);
 
             glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
             glUniform1i(object_id_uniform, BULLET);
@@ -1157,16 +1155,15 @@ void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
     {
         Bullet newBullet;
 
+        float distance = 20;
+
+        newBullet.finish = false;
         newBullet.timeInitial = glfwGetTime();
+
         newBullet.origin = character_pos;
-        newBullet.goal = character_pos + glm::vec4(view_direction.x * 20,
-                                                   view_direction.y * 20,
-                                                   view_direction.z * 20,
-                                                   0.0f);
-        newBullet.destiny = glm::vec4(newBullet.goal.x, 0.0f, newBullet.goal.z, 1.0f);
-        newBullet.destiny += glm::vec4(view_direction.x * 10, 0.0f,view_direction.z * 10,0.0f);
-        
-        newBullet.object_angle = g_CameraTheta + M_PI;
+        newBullet.aux_1 = newBullet.origin + (distance * view_direction);
+        newBullet.aux_2 = newBullet.aux_1 + (distance * movement_direction);
+        newBullet.destiny = glm::vec4(newBullet.aux_2.x, 0.0f, newBullet.aux_2.z, 0.0f) + (distance * movement_direction);
 
         bulletsOnScene.push_back(newBullet);
     }

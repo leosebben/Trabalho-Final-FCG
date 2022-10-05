@@ -111,6 +111,8 @@ struct Bullet
     glm::vec4   aux_1;
     glm::vec4   aux_2;
     glm::vec4   destiny;
+
+    glm::vec4   lastPos;
 };
 
 // A cena virtual é uma lista de objetos nomeados, guardados em um dicionário (map). FONTE: Laboratório 2
@@ -344,7 +346,7 @@ int main(int argc, char* argv[]) {
         float timeVariation = glfwGetTime() - lastInputTime;
         lastInputTime = glfwGetTime();
 
-        float speed = 4.0;
+        float speed = 8.0;
         float resultDistance = speed * timeVariation;
 
         movement_direction = glm::vec4(camera_view_vector.x / length_2, 0.0f, camera_view_vector.z / length_2, 0.0f);
@@ -413,7 +415,17 @@ int main(int argc, char* argv[]) {
             glm::vec4 sub_line_2 = line_2 + timeInterval * (line_3 - line_2);
             glm::vec4 result_point = sub_line_1 + timeInterval * (sub_line_2 - sub_line_1);
 
-            model = Matrix_Translate(result_point.x, result_point.y, result_point.z) * Matrix_Scale(10.0f,10.0f,10.0f);
+            glm::vec4 bullet_view_vector = (result_point - bulletsOnScene[i].lastPos) / norm(result_point - bulletsOnScene[i].lastPos);
+            glm::vec4 base_vector = glm::vec4(0.0f,0.0f,-1.0f,0.0f);
+
+            float angle = dotproduct(base_vector,bullet_view_vector) / norm(base_vector) * norm(bullet_view_vector);
+            angle = acos(angle);
+
+            glm::vec4 axis_to_rotate = crossproduct(base_vector, bullet_view_vector);
+
+            model = Matrix_Translate(result_point.x, result_point.y, result_point.z) * Matrix_Scale(10.0f,10.0f,10.0f) * Matrix_Rotate(angle, axis_to_rotate);
+
+            bulletsOnScene[i].lastPos = result_point;
 
             glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
             glUniform1i(object_id_uniform, BULLET);
@@ -1164,6 +1176,8 @@ void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
         newBullet.aux_1 = newBullet.origin + (distance * view_direction);
         newBullet.aux_2 = newBullet.aux_1 + (distance * movement_direction);
         newBullet.destiny = glm::vec4(newBullet.aux_2.x, 0.0f, newBullet.aux_2.z, 0.0f) + (distance * movement_direction);
+
+        newBullet.lastPos = newBullet.origin;
 
         bulletsOnScene.push_back(newBullet);
     }

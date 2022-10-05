@@ -189,7 +189,7 @@ glm::mat4 Matrix_Rotate(float angle, glm::vec4 axis)
           vx*vx*(1-c)+c , vx*vy*(1-c)-vz*s, vx*vz*(1-c)+vy*s,   0.0f ,  // LINHA 1
         vx*vy*(1-c)+vz*s,  vy*vy*(1-c)+c  , vy*vz*(1-c)-vx*s,   0.0f ,  // LINHA 2
         vx*vz*(1-c)-vy*s, vy*vz*(1-c)+vx*s,  vz*vz*(1-c)+c  ,   0.0f ,  // LINHA 3
-              0.0f      ,       0.0f      ,        0.0f     ,   0.0f    // LINHA 4
+              0.0f      ,       0.0f      ,        0.0f     ,   1.0f    // LINHA 4
     );
 }
 
